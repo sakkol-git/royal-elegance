@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-  "build": "npx open-next build",
+    "build": "next build",
   "vercel-build": "next build",
     "dev": "next dev",
   "cf:build": "npx open-next build",
