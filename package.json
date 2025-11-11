@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
   "build": "npx open-next build",
+  "vercel-build": "next build",
     "dev": "next dev",
   "cf:build": "npx open-next build",
   "cf:deploy": "npm run cf:build && npx wrangler pages deploy .open-next --project-name=$CF_PAGES_PROJECT --branch=main",

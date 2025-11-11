@@ -27,7 +27,24 @@ How to build locally (quick checks)
 1. Install dependencies:
    npm install --legacy-peer-deps
 2. Run Next build and OpenNext build (this may take several minutes):
-   npm run build
+  npm run build
+
+Deploying to Vercel (optional)
+
+This repository can also be deployed to Vercel. Vercel expects a standard Next.js build and does not need OpenNext. To deploy to Vercel, do one of the following:
+
+- In the Vercel project settings set the Framework Preset to "Next.js" and Build Command to:
+
+  ```bash
+  npm run vercel-build
+  ```
+
+- Alternatively, rely on Vercel's default which runs `next build`. We added a convenience script `vercel-build` that runs `next build` directly so Vercel won't run `open-next` there.
+
+Notes when deploying to Vercel:
+- Remove or do not call any Wrangler/OpenNext-specific deploy commands in the Vercel build or post-build hooks. Vercel will handle building and publishing your app.
+- Ensure required environment variables are set in the Vercel dashboard (same list as Cloudflare: Supabase, Stripe keys, NEXT_PUBLIC_APP_URL, etc.).
+- If your app relies on Cloudflare-specific adapters or OpenNext artifacts, test the app thoroughly on Vercel — some Cloudflare-specific runtime behaviors (Workers-specific APIs) may not be available. This project is standard Next.js so Vercel should run it fine.
 
 How to run locally for development
 - Use Next dev for local development:
