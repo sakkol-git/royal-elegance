@@ -23,14 +23,12 @@ jobs:
         run: npm ci
 
       - name: Build (Next + OpenNext)
-        run: npm run build
+        run: npm run cf:build
 
       - name: Deploy (guarded)
         env:
           CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
           CF_PAGES_PROJECT: ${{ secrets.CF_PAGES_PROJECT }}
         run: |
-          # Use the guarded deploy script which will call Wrangler only when
-          # it is safe (and will skip inside Pages builds). Running from CI
-          # avoids the self-triggering Pages deploy loop.
-          npm run deploy
+          # Deploy directly with Wrangler since we're in CI (not inside Pages build)
+          npx wrangler pages deploy .open-next --project-name=$CF_PAGES_PROJECT --branch=main
