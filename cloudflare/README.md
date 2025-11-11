@@ -20,8 +20,9 @@ Required environment variables (set these in Cloudflare Pages > Settings > Envir
 Cloudflare Pages settings (recommended)
 - Framework preset: "None" (we run CLI build)
 - Build command: npm run cf:build
-- Build output directory: leave default (OpenNext produces Pages-compatible output)
+- Build output directory: .open-next
 - Node version: 18.x or 20.x (match your local environment)
+- **IMPORTANT**: Leave the "Deploy command" field EMPTY. Do NOT set it to `npx wrangler deploy` or any wrangler command, as this causes deployment loops and errors.
 
 How to build locally (quick checks)
 1. Install dependencies:
@@ -61,8 +62,8 @@ Why you may see a "build loop" (and how to fix it)
 
 - Cause: If you configure Cloudflare Pages to run a deploy command that itself calls `wrangler deploy` (or any command that triggers a Pages deployment), Pages will perform a deploy which triggers the repository webhook and starts another Pages build — this creates a loop.
 - Example problematic setup (DO NOT do this in Pages settings):
-  - Build command: `npm run build`
-  - Deploy command: `npx wrangler deploy`
+  - Build command: `npm run cf:build`
+  - Deploy command: `npx wrangler deploy` ← **THIS IS THE PROBLEM YOU'RE SEEING**
 
   In that case, the Pages build runs `npx wrangler deploy`, which issues a new Pages deployment and so on.
 
@@ -90,8 +91,9 @@ When Pages is doing the build, the guard prevents `npx wrangler deploy` from exe
 
 Recommended Pages settings
 
-- Build command: `npm run build` (our `build` now runs OpenNext to produce `.open-next`)
-- Do NOT set a custom deploy command that calls `wrangler`.
+- Build command: `npm run cf:build`
+- Build output directory: `.open-next`
+- **Deploy command: LEAVE EMPTY** (do not set to `npx wrangler deploy` or any wrangler command)
 - If you want to deploy from CI, run `npm run cf:deploy` or `npm run wrangler:deploy-guarded` there and keep Pages configured only to build (or disable automatic builds for that repo/project).
 
 Optional: deploy via Wrangler CLI
