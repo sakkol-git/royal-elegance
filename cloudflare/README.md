@@ -40,6 +40,43 @@ Deploying to Cloudflare Pages
 4. Set the build command to `npm run cf:build`.
 5. Start the deployment — Cloudflare will run the build and deploy the site.
 
+Why you may see a "build loop" (and how to fix it)
+
+- Cause: If you configure Cloudflare Pages to run a deploy command that itself calls `wrangler deploy` (or any command that triggers a Pages deployment), Pages will perform a deploy which triggers the repository webhook and starts another Pages build — this creates a loop.
+- Example problematic setup (DO NOT do this in Pages settings):
+  - Build command: `npm run build`
+  - Deploy command: `npx wrangler deploy`
+
+  In that case, the Pages build runs `npx wrangler deploy`, which issues a new Pages deployment and so on.
+
+Fixes (choose one)
+
+1) Let Pages handle the build and deploy (recommended)
+  - In Cloudflare Pages settings, set the Build command to `npm run build` (or `npm run cf:build`) and remove any custom deploy command. Pages will build and then publish the site itself — do not call `wrangler` from within the Pages build.
+
+2) Self-deploy from CI (recommended if you want manual control)
+  - Keep Pages build disabled (or use a different deploy flow) and run `npx wrangler deploy` from your CI (GitHub Actions, GitLab CI) outside of Pages build steps. This avoids Pages re-triggering itself.
+
+3) If you must run Wrangler from a build environment, use the guarded script
+  - Use the provided `wrangler:deploy-guarded` npm script which will skip running Wrangler when it detects it's inside a Pages build (Pages exposes environment variables like `CF_PAGES`):
+
+```bash
+# set these in CI or locally
+export CF_API_TOKEN="<your-token>"
+export CF_PAGES_PROJECT="royal-elegance"
+
+# guarded deploy (safe to run outside Pages; will skip inside Pages builds)
+npm run wrangler:deploy-guarded
+```
+
+When Pages is doing the build, the guard prevents `npx wrangler deploy` from executing and avoids the loop.
+
+Recommended Pages settings
+
+- Build command: `npm run build` (our `build` now runs OpenNext to produce `.open-next`)
+- Do NOT set a custom deploy command that calls `wrangler`.
+- If you want to deploy from CI, run `npm run cf:deploy` or `npm run wrangler:deploy-guarded` there and keep Pages configured only to build (or disable automatic builds for that repo/project).
+
 Optional: deploy via Wrangler CLI
 
 If you prefer to run the Pages deployment yourself (or from CI) instead of letting
