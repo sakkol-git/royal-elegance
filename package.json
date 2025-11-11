@@ -8,6 +8,7 @@
     "dev": "next dev",
   "cf:build": "npx open-next build",
   "cf:deploy": "npm run cf:build && npx wrangler pages deploy .open-next --project-name=$CF_PAGES_PROJECT --branch=main",
+  "pages:deploy": "npm run cf:build && npx wrangler pages deploy .open-next --project-name=$CF_PAGES_PROJECT --branch=main",
   "wrangler:deploy-guarded": "sh -c 'if [ -z \"$CF_PAGES\" ] && [ -z \"$PAGES_BRANCH\" ] && [ -z \"$PAGES_COMMIT_SHA\" ]; then npx wrangler deploy --assets=./.open-next --name=$CF_PAGES_PROJECT; else echo \"Skipping wrangler deploy inside Pages build environment\"; fi'",
   "deploy": "npm run wrangler:deploy-guarded",
     "lint": "eslint .",
