@@ -1,0 +1,20 @@
+# Example Wrangler configuration. Do NOT commit your real credentials.
+# Fill in the values below and either copy to wrangler.toml locally or
+# set the corresponding environment variables in CI/Cloudflare Pages.
+
+name = "royal-elegance"
+type = "webpack"
+
+# Replace with your Cloudflare Account ID or set CF_ACCOUNT_ID in the environment
+account_id = "YOUR_CLOUDFLARE_ACCOUNT_ID"
+
+# Optional: set a compatibility date (YYYY-MM-DD)
+compatibility_date = "2025-11-11"
+
+[site]
+bucket = "./.open-next"
+entry-point = "."
+
+# If you're using Pages via 'wrangler pages deploy', you generally supply
+# the project name on the CLI. This file is a helpful template for other
+# wrangler commands. Keep secrets in your environment, not in this file.

@@ -40,6 +40,54 @@ Deploying to Cloudflare Pages
 4. Set the build command to `npm run cf:build`.
 5. Start the deployment — Cloudflare will run the build and deploy the site.
 
+Optional: deploy via Wrangler CLI
+
+If you prefer to run the Pages deployment yourself (or from CI) instead of letting
+Cloudflare Pages run the build, you can use Wrangler to deploy the generated
+`.open-next` output. A convenience script has been added to `package.json`:
+
+- `npm run cf:deploy` — runs the OpenNext build and then runs a Wrangler Pages
+  deploy command. It expects the environment variable `CF_PAGES_PROJECT` to be
+  set (your Pages project name) and a Cloudflare API token available as
+  `CF_API_TOKEN` in the environment.
+
+Example usage (locally or in CI) — set env vars and run:
+
+```bash
+# set these in your CI provider or locally (do not commit tokens)
+export CF_API_TOKEN="<your-token>"
+export CF_PAGES_PROJECT="royal-elegance"
+
+# build + deploy
+npm run cf:deploy
+```
+
+Notes on token & permissions
+
+- Create an API token in the Cloudflare Dashboard with the minimum required
+  scopes for Pages and Workers (Pages: Edit / Workers: Scripts: Edit). Use the
+  token in the environment variable `CF_API_TOKEN`.
+- If you need a `wrangler.toml` for other Wrangler commands, copy
+  `wrangler.example.toml` to `wrangler.toml` and fill in your `account_id`.
+
+Alternatively, you can use a JSONC-based Wrangler config `wrangler.jsonc` that
+declares an `assets.directory` (useful when uploading a folder of files such as
+OpenNext output). A template `wrangler.jsonc` is included in the repo — edit
+it to set your `account_id` or set `CF_ACCOUNT_ID` in the environment. If you
+prefer to avoid a committed file, don't commit `wrangler.jsonc` and instead
+pass the assets directory explicitly using CLI flags (example below).
+
+CLI example without committing config file:
+
+```bash
+# build
+npm run cf:build
+
+# deploy the generated .open-next folder
+npx wrangler deploy --assets=./.open-next --name=royal-elegance
+```
+
+
 Notes and troubleshooting
 - OpenNext v3+ is used here. If you see runtime errors after deployment, check Cloudflare Functions logs and ensure server-side environment variables are present.
 - If you prefer the older @cloudflare/next-on-pages adapter, it was previously added but is deprecated; OpenNext is the recommended path.

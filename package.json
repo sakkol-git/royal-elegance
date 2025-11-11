@@ -5,7 +5,8 @@
   "scripts": {
     "build": "next build",
     "dev": "next dev",
-    "cf:build": "npx open-next build",
+  "cf:build": "npx open-next build",
+  "cf:deploy": "npm run cf:build && npx wrangler pages deploy .open-next --project-name=$CF_PAGES_PROJECT --branch=main",
     "lint": "eslint .",
     "seed": "tsx scripts/seed-database.ts",
     "seed:users": "tsx scripts/seed-demo-users.ts",

@@ -1,0 +1,15 @@
+{
+  // Wrangler configuration (JSONC). Fill in your account id or set
+  // the CF_ACCOUNT_ID env variable in CI. Do NOT commit secrets.
+  "name": "royal-elegance",
+  "compatibility_date": "2025-11-11",
+
+  // You can replace the value below with your real account id or set
+  // CF_ACCOUNT_ID in your CI environment and remove this line.
+  "account_id": "YOUR_CLOUDFLARE_ACCOUNT_ID",
+
+  // This tells Wrangler to upload the .open-next directory as Pages/Assets.
+  "assets": {
+    "directory": "./.open-next"
+  }
+}
