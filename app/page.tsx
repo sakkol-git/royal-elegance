@@ -10,8 +10,12 @@ import SEO from "@/components/ui/SEO"
 export default function LandingPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(true)
+  const [authChecked, setAuthChecked] = useState(false)
 
   useEffect(() => {
+    // Prevent multiple auth checks
+    if (authChecked) return
+
     const checkAuth = async () => {
       try {
         const supabase = createClient()
@@ -41,11 +45,12 @@ export default function LandingPage() {
         console.error('Auth check error:', error)
       } finally {
         setLoading(false)
+        setAuthChecked(true)
       }
     }
 
     checkAuth()
-  }, [router])
+  }, [router, authChecked])
 
   if (loading) {
     return (
