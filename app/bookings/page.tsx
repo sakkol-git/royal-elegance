@@ -983,7 +983,7 @@ export default function BookingsPage() {
                             <span>•</span>
                             <span>{nights}N • {booking.guests}G</span>
                             <span>•</span>
-                            <span className="text-red-600">Cancelled {new Date(booking.updatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+                            <span className="text-red-600">Cancelled {booking.updatedAt ? new Date(booking.updatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'Unknown'}</span>
                           </div>
                         </div>
 
@@ -1018,7 +1018,7 @@ export default function BookingsPage() {
                             <div className="flex-1">
                               <h4 className="font-semibold text-red-900 mb-1">Booking Cancelled</h4>
                               <p className="text-sm text-red-700">
-                                This booking was cancelled on {new Date(booking.updatedAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}.
+                                This booking was cancelled on {booking.updatedAt ? new Date(booking.updatedAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'Unknown date'}.
                                 Refund processing typically takes 5-7 business days.
                               </p>
                             </div>
