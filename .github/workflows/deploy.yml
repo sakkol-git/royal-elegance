@@ -1,15 +1,13 @@
-name: CI Deploy to Cloudflare Pages
+name: Deploy to Vercel
 
 on:
-  push:
-    branches:
-      - main
+  release:
+    types: [published]
+  workflow_dispatch:
 
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -22,13 +20,13 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build (Next + OpenNext)
-        run: npm run cf:build
+      - name: Build
+        run: npm run build
 
-      - name: Deploy (guarded)
+      - name: Deploy to Vercel
         env:
-          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
-          CF_PAGES_PROJECT: ${{ secrets.CF_PAGES_PROJECT }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
         run: |
-          # Deploy directly with Wrangler since we're in CI (not inside Pages build)
-          npx wrangler pages deploy .open-next --project-name=$CF_PAGES_PROJECT --branch=main
+          npx vercel --prod --yes

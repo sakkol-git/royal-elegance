@@ -26,5 +26,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# OpenNext build output
-.open-next/
+# ignore OpenNext output
+.open-next
+
