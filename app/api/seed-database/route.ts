@@ -17,7 +17,7 @@ export async function POST() {
 
     // Optional: protect seeding with a secret header, if provided
     if (seedSecret) {
-      const incoming = headers()
+      const incoming = await headers()
       const provided = incoming.get("x-seed-secret")
       if (provided !== seedSecret) {
         return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 })
