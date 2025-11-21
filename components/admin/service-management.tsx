@@ -76,7 +76,7 @@ export function ServiceManagement() {
         await updateService(editingId, { ...formData, slug })
         toast({ title: "Service updated successfully" })
       } else {
-        await addService({ ...formData, slug, createdAt: new Date() })
+  await addService({ ...formData, slug })
         toast({ title: "Service added successfully" })
       }
       // Refresh services list

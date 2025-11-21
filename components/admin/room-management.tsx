@@ -22,11 +22,16 @@ export function RoomManagement() {
   const [roomTypes, setRoomTypes] = useState<RoomType[]>([])
   const [isOpen, setIsOpen] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    roomNumber: string
+    floorId: string
+    roomTypeId: string
+    status: Room["status"]
+  }>({
     roomNumber: "",
     floorId: "",
     roomTypeId: "",
-    status: "available" as const,
+    status: "available",
   })
   const { toast } = useToast()
 

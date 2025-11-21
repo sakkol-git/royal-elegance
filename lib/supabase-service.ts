@@ -298,7 +298,8 @@ export const getRoomTypes = async (): Promise<RoomType[]> => {
   return data.map(convertTimestamps) as RoomType[]
 }
 
-export const addRoomType = async (roomType: Omit<RoomType, "id">): Promise<string> => {
+// When creating a room type, the database will set created_at. Don't require createdAt from callers.
+export const addRoomType = async (roomType: Omit<RoomType, "id" | "createdAt">): Promise<string> => {
   const client = (typeof window !== 'undefined' ? createBrowserClient() : undefined) || supabase
   if (!client) throw new Error("Supabase client not initialized")
   
@@ -385,7 +386,8 @@ export const getRoomsByFloor = async (floorId: string): Promise<Room[]> => {
   return data.map(convertTimestamps) as Room[]
 }
 
-export const addRoom = async (room: Omit<Room, "id">): Promise<string> => {
+// When creating a room, the database will set created_at. Don't require createdAt from callers.
+export const addRoom = async (room: Omit<Room, "id" | "createdAt">): Promise<string> => {
   const client = (typeof window !== 'undefined' ? createBrowserClient() : undefined) || supabase
   if (!client) throw new Error("Supabase client not initialized")
   
@@ -438,7 +440,8 @@ export const getServices = async (): Promise<Service[]> => {
   return data.map(convertTimestamps) as Service[]
 }
 
-export const addService = async (service: Omit<Service, "id">): Promise<string> => {
+// When creating a service, the database will set created_at. Don't require createdAt from callers.
+export const addService = async (service: Omit<Service, "id" | "createdAt">): Promise<string> => {
   const client = (typeof window !== 'undefined' ? createBrowserClient() : undefined) || supabase
   if (!client) throw new Error("Supabase client not initialized")
   
@@ -574,7 +577,8 @@ export const getBookingsByRoom = async (roomId: string): Promise<Booking[]> => {
   return data.map(convertTimestamps) as Booking[]
 }
 
-export const addBooking = async (booking: Omit<Booking, "id">): Promise<string> => {
+// When creating a booking, the database will set created_at. Don't require createdAt from callers.
+export const addBooking = async (booking: Omit<Booking, "id" | "createdAt">): Promise<string> => {
   const client = (typeof window !== 'undefined' ? createBrowserClient() : undefined) || supabase
   if (!client) throw new Error("Supabase client not initialized")
 

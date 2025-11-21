@@ -71,7 +71,6 @@ export function RoomTypeManagement() {
       slug,
       amenities: formData.amenities.split(",").map((a) => a.trim()).filter(a => a),
       images: formData.images,
-      createdAt: new Date(),
     }
 
     try {
