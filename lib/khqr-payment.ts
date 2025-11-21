@@ -71,8 +71,15 @@ export class KHQRService {
    */
   async createPayment(paymentData: KHQRPaymentData): Promise<KHQRPaymentResponse> {
     try {
-      // Use real Payway API for KHQR payments
-      const response = await fetch('/api/khqr/create-payment', {
+      const endpoint = '/api/khqr/create-payment'
+
+      // Use real Payway API for KHQR payments (server route)
+      // Log request details to help debug network / CORS issues in the browser
+      if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+        console.log('🔁 KHQR createPayment ->', { endpoint, body: { amount: paymentData.amount, currency: paymentData.currency } })
+      }
+
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -114,7 +121,18 @@ export class KHQRService {
         }
       }
     } catch (error) {
-      console.error('KHQR payment creation failed:', error)
+      // Enrich network error logs to make "Failed to fetch" actionable
+      try {
+        const online = typeof navigator !== 'undefined' ? navigator.onLine : 'server'
+        console.error('KHQR payment creation failed:', {
+          error,
+          endpoint: '/api/khqr/create-payment',
+          navigatorOnline: online
+        })
+      } catch (e) {
+        console.error('KHQR payment creation failed (unable to read navigator):', error)
+      }
+
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Payment creation failed'
@@ -163,9 +181,14 @@ export class KHQRService {
         customerReference: result.customerReference
       }
     } catch (error) {
-      console.error('💥 Payment status check error:', error)
-      
-      // Return a default response instead of throwing
+      try {
+        const online = typeof navigator !== 'undefined' ? navigator.onLine : 'server'
+        console.error('💥 Payment status check error:', { error, endpoint: `/api/khqr/status/${transactionId}`, navigatorOnline: online })
+      } catch (e) {
+        console.error('💥 Payment status check error:', error)
+      }
+
+      // Return a default response instead of throwing so callers can continue polling
       return {
         transactionId,
         status: 'pending',
