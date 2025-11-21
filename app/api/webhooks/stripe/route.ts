@@ -109,4 +109,3 @@ export async function POST(req: NextRequest) {
 
 // Next.js route segment config: use individual exports
 export const dynamic = "force-dynamic"
-export const bodyParser = false // Ensure raw body for signature verification
