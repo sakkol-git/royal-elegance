@@ -29,7 +29,6 @@ export default function RootLayout({
           <EnvBanner />
           {children}
           <Toaster />
-          <PremiumFooter />
         </AuthProvider>
         <Analytics />
       </body>

@@ -478,7 +478,23 @@ export const deleteService = async (id: string): Promise<void> => {
     .delete()
     .eq("id", id)
 
-  if (error) throw error
+  if (error) {
+    // If the service is referenced by booking_services (FK constraint), prefer a safe soft-delete
+    // instead of failing. This keeps historical booking data intact while removing the service
+    // from active listings. Postgres FK violation code is 23503.
+    if ((error as any).code === '23503') {
+      console.warn(`[deleteService] FK constraint prevents delete for service ${id}. Marking as unavailable instead.`)
+      // Use updateService helper to mark the service unavailable (this will convert keys to snake_case)
+      try {
+        await updateService(id, { available: false })
+        return
+      } catch (updateErr) {
+        console.error('[deleteService] Failed to mark service unavailable after FK error:', updateErr)
+        throw error
+      }
+    }
+    throw error
+  }
 }
 
 // Service Categories
