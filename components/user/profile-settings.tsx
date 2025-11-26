@@ -229,7 +229,7 @@ export function ProfileSettings() {
       </div>
 
       <Tabs defaultValue="profile" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
+    <TabsList className="grid w-full grid-cols-4 h-full">
           <TabsTrigger value="profile">
             <User className="w-4 h-4 mr-2" />
             Profile

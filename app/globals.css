@@ -42,41 +42,6 @@
   --sidebar-ring: oklch(0.5 0.02 264);
 }
 
-.dark {
-  --background: oklch(0.12 0.01 264);
-  --foreground: oklch(0.95 0.005 264);
-  --card: oklch(0.15 0.01 264 / 0.7);
-  --card-foreground: oklch(0.95 0.005 264);
-  --popover: oklch(0.15 0.01 264 / 0.95);
-  --popover-foreground: oklch(0.95 0.005 264);
-  --primary: oklch(0.85 0.01 264);
-  --primary-foreground: oklch(0.15 0.01 264);
-  --secondary: oklch(0.22 0.015 264);
-  --secondary-foreground: oklch(0.95 0.005 264);
-  --muted: oklch(0.2 0.015 264);
-  --muted-foreground: oklch(0.6 0.01 264);
-  --accent: oklch(0.35 0.05 220);
-  --accent-foreground: oklch(0.95 0.005 264);
-  --destructive: oklch(0.45 0.18 25);
-  --destructive-foreground: oklch(0.95 0.005 264);
-  --border: oklch(0.25 0.015 264);
-  --input: oklch(0.25 0.015 264);
-  --ring: oklch(0.6 0.02 264);
-  --chart-1: oklch(0.5 0.15 220);
-  --chart-2: oklch(0.55 0.12 180);
-  --chart-3: oklch(0.45 0.18 280);
-  --chart-4: oklch(0.6 0.14 140);
-  --chart-5: oklch(0.5 0.16 320);
-  --sidebar: oklch(0.12 0.01 264 / 0.8);
-  --sidebar-foreground: oklch(0.95 0.005 264);
-  --sidebar-primary: oklch(0.85 0.01 264);
-  --sidebar-primary-foreground: oklch(0.15 0.01 264);
-  --sidebar-accent: oklch(0.22 0.015 264 / 0.5);
-  --sidebar-accent-foreground: oklch(0.95 0.005 264);
-  --sidebar-border: oklch(0.25 0.015 264 / 0.3);
-  --sidebar-ring: oklch(0.6 0.02 264);
-}
-
 @theme inline {
   --font-sans: "Geist", "Geist Fallback";
   --font-mono: "Geist Mono", "Geist Mono Fallback";
@@ -278,6 +243,7 @@
   }
 
   .tabs-trigger[data-state="active"] {
+    align-self: center;
     background: linear-gradient(135deg, rgba(116, 97, 35, 0.712) 0%, rgba(255, 255, 255, 0.9) 50%, rgba(212, 175, 55, 0.15) 100%);
     border: 1.5px solid rgba(212, 175, 55, 0.4);
     box-shadow: 0 4px 12px rgba(212, 175, 55, 0.2), 

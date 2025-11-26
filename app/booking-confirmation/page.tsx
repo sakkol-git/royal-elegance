@@ -73,6 +73,14 @@ function BookingConfirmationContent() {
         if (bookingError) throw bookingError
         if (!bookingData) throw new Error("Booking not found")
 
+        // Load service items for this booking from the booking_services junction table
+        const { data: bookedServicesData } = await supabase
+          .from('booking_services')
+          .select('service_id')
+          .eq('booking_id', bookingId)
+
+        const serviceIds: string[] = (bookedServicesData || []).map((s: any) => s.service_id)
+
         const targetBooking: Booking = {
           id: bookingData.id,
           bookingReference: bookingData.booking_reference,
@@ -95,10 +103,11 @@ function BookingConfirmationContent() {
           paymentStatus: bookingData.payment_status,
           paymentMethod: bookingData.payment_method,
           paidAmount: bookingData.paid_amount,
-          bookingType: bookingData.room_id ? 'room' : 'service',
+          // Determine booking type: room | service | both
+          bookingType: bookingData.room_id && serviceIds.length > 0 ? 'both' : (bookingData.room_id ? 'room' : 'service'),
           createdAt: new Date(bookingData.created_at),
           updatedAt: bookingData.updated_at ? new Date(bookingData.updated_at) : undefined,
-          services: bookingData.services || [],
+          services: serviceIds || [],
         }
 
         setBooking(targetBooking)
@@ -130,6 +139,14 @@ function BookingConfirmationContent() {
             // Re-fetch latest booking row
             const { data: latest, error } = await supabase.from('bookings').select('*').eq('id', bookingId).single()
             if (!error && latest) {
+              // Also fetch latest booking_services for this booking to keep services in sync
+              const { data: latestServices } = await supabase
+                .from('booking_services')
+                .select('service_id')
+                .eq('booking_id', bookingId)
+
+              const updatedServiceIds: string[] = (latestServices || []).map((s: any) => s.service_id)
+
               const updated: Booking = {
                 id: latest.id,
                 bookingReference: latest.booking_reference,
@@ -152,10 +169,10 @@ function BookingConfirmationContent() {
                 paymentStatus: latest.payment_status,
                 paymentMethod: latest.payment_method,
                 paidAmount: latest.paid_amount,
-                bookingType: latest.room_id ? 'room' : 'service',
+                bookingType: latest.room_id && updatedServiceIds.length > 0 ? 'both' : (latest.room_id ? 'room' : 'service'),
                 createdAt: new Date(latest.created_at),
                 updatedAt: latest.updated_at ? new Date(latest.updated_at) : undefined,
-                services: latest.services || [],
+                services: updatedServiceIds || [],
               }
               setBooking(updated)
             }
@@ -218,8 +235,8 @@ function BookingConfirmationContent() {
     <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-background print:bg-white">
       <PremiumNavbar />
       
-      <main className="container mx-auto px-4 py-8 print:p-0 print:m-0" style={{ marginTop: "112px" }}>
-        
+      <main className="container mx-auto px-4 py-2 print:p-0 print:m-0" style={{ marginTop: "112px" }}>
+
   {/* Main Luxury Card Container (smaller) */}
   <div className="max-w-2xl mx-auto animate-fade-in-up">
           
@@ -245,7 +262,8 @@ function BookingConfirmationContent() {
             <CardContent className="p-0">
               
               {/* Header Section */}
-              <div className="p-6 md:p-8 border-b border-neutral-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+              {/* reduced top padding to bring header closer to gold accent bar */}
+              <div className="pt-4 md:pt-6 px-6 md:px-8 border-b border-neutral-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
                   <div className="flex items-center gap-2 text-[#d4af37] mb-2">
                     <CheckCircle2 className="w-5 h-5 fill-[#d4af37] text-white" />

@@ -98,10 +98,14 @@ function StripePaymentElementInner({ bookingId, markPaidToken }: { bookingId: st
       })
 
       if (error) {
-        console.error("[Payment] Payment failed:", error)
+        // Normalize error for better logging / user message. Some stripe SDK
+        // responses may be an empty object or have non-standard fields.
+        const normalizedMessage =
+          (error as any)?.message || (error as any)?.code || (Object.keys(error).length ? JSON.stringify(error) : null)
+        console.error("[Payment] Payment failed:", error, "normalizedMessage=", normalizedMessage)
         toast({
           title: "Payment failed",
-          description: error.message || "An unexpected error occurred",
+          description: normalizedMessage || "An unexpected error occurred",
           variant: "destructive",
         })
       } else {

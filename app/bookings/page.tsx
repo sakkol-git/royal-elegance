@@ -149,7 +149,7 @@ export default function BookingsPage() {
     const { data } = supabase.auth.onAuthStateChange(
       (_event: string, session: AuthSession | null) => {
         setUser(session?.user ?? null)
-        if (!session?.user) router.push("/login")
+        if (!session?.user) router.push("/auth/login")
       }
     )
 
@@ -169,11 +169,42 @@ export default function BookingsPage() {
 
       if (bookingsError) throw bookingsError
 
+      // Map DB rows to Booking objects and collect booking IDs so we can
+      // fetch associated booking_services rows in a single query.
+      const bookingRows: any[] = userBookingsData.map((booking: any) => ({
+        raw: booking,
+        id: booking.id,
+        createdAt: new Date(booking.created_at),
+        updatedAt: booking.updated_at ? new Date(booking.updated_at) : undefined,
+        checkInDate: new Date(booking.check_in_date),
+        checkOutDate: new Date(booking.check_out_date),
+        checkIn: new Date(booking.check_in_date),
+        checkOut: new Date(booking.check_out_date),
+      }))
+
+  const bookingIds = bookingRows.map((b: any) => b.id)
+
+      // Fetch booking_services for all bookings in one call to avoid N+1.
+      let bookingServicesMap: Record<string, string[]> = {}
+      if (bookingIds.length > 0) {
+        const { data: bsData, error: bsError } = await supabase
+          .from('booking_services')
+          .select('booking_id, service_id')
+          .in('booking_id', bookingIds)
+
+        if (bsError) throw bsError
+        bookingServicesMap = (bsData || []).reduce((acc: any, row: any) => {
+          acc[row.booking_id] = acc[row.booking_id] || []
+          acc[row.booking_id].push(row.service_id)
+          return acc
+        }, {})
+      }
+
       const userBookings = userBookingsData.map((booking: any) => ({
         ...booking,
         id: booking.id,
         createdAt: new Date(booking.created_at),
-        updatedAt: new Date(booking.updated_at),
+        updatedAt: booking.updated_at ? new Date(booking.updated_at) : undefined,
         checkInDate: new Date(booking.check_in_date),
         checkOutDate: new Date(booking.check_out_date),
         checkIn: new Date(booking.check_in_date),
@@ -191,10 +222,11 @@ export default function BookingsPage() {
         paymentMethod: booking.payment_method,
         paidAmount: booking.paid_amount,
         paymentStatus: booking.payment_status,
-        bookingType: booking.room_id ? 'room' : 'service',
+        // Determine booking type and populate services from the booking_services join
+        services: bookingServicesMap[booking.id] || [],
+        bookingType: booking.room_id && (bookingServicesMap[booking.id] || []).length > 0 ? 'both' : (booking.room_id ? 'room' : 'service'),
         totalPrice: booking.total_price,
         status: booking.status,
-        services: booking.services || [],
       })) as Booking[]
 
       const [allRooms, allRoomTypes, allServices] = await Promise.all([

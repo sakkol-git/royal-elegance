@@ -130,7 +130,7 @@ export default function ServicesPage() {
           <Button
             variant={selectedCategory === null ? "default" : "outline"}
             onClick={() => setSelectedCategory(null)}
-            className="glass"
+            className="glass hover:text-[#d4af37] hover:border-[#d4af37] focus:ring-[#d4af37]/30"
           >
             All Services
             <Badge variant="secondary" className="ml-2">
@@ -144,7 +144,7 @@ export default function ServicesPage() {
                 key={category.id}
                 variant={selectedCategory === category.slug ? "default" : "outline"}
                 onClick={() => setSelectedCategory(category.slug)}
-                className="glass"
+                className="glass hover:text-[#d4af37] hover:border-[#d4af37] focus:ring-[#d4af37]/30"
                 disabled={count === 0}
               >
                 <span className="mr-2">{category.icon || "📋"}</span>
