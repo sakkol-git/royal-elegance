@@ -36,7 +36,7 @@ export async function GET(req: NextRequest) {
       userId: user.id,
       userEmail: user.email,
       bookingsCount: bookings?.length || 0,
-      bookings: bookings?.map(b => ({
+      bookings: bookings?.map((b: any) => ({
         id: b.id,
         booking_reference: b.booking_reference,
         status: b.status,
