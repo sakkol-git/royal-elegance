@@ -45,8 +45,9 @@ export function ProfessionalProfileHeader({ stats }: ProfessionalProfileHeaderPr
     const supabase = createClient()
     
     // Get initial user
-    supabase.auth.getUser().then(({ data: { user } }: { data: { user: SupabaseUser | null } }) => {
-      setUser(user)
+    supabase.auth.getUser().then(({ data }: { data: { user: SupabaseUser | null } }) => {
+      const u = (data as any)?.user ?? null
+      setUser(u)
     })
 
     // Subscribe to auth changes

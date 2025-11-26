@@ -24,12 +24,13 @@ export default function ServiceBookingPage() {
     const supabase = createClient()
     
     // Get initial user
-    supabase.auth.getUser().then(({ data: { user } }: { data: { user: SupabaseUser | null } }) => {
-      setUser(user)
+    supabase.auth.getUser().then(({ data }: { data: { user: SupabaseUser | null } }) => {
+      const u = (data as any)?.user ?? null
+      setUser(u)
       setLoading(false)
       
       // Redirect if not authenticated
-      if (!user) {
+      if (!u) {
         router.push("/login")
       }
     })

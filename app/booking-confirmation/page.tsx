@@ -46,10 +46,11 @@ function BookingConfirmationContent() {
   // ... (Keep existing Authentication and Data Fetching logic unchanged) ...
   useEffect(() => {
     const supabase = createClient()
-    supabase.auth.getUser().then(({ data: { user } }: { data: { user: SupabaseUser | null } }) => {
-      setUser(user)
+    supabase.auth.getUser().then(({ data }: { data: { user: SupabaseUser | null } }) => {
+      const u = (data as any)?.user ?? null
+      setUser(u)
       setLoading(false)
-      if (!user) router.push("/")
+      if (!u) router.push("/")
     })
     const { data } = supabase.auth.onAuthStateChange((_event: string, session: any) => {
       setUser(session?.user ?? null)
