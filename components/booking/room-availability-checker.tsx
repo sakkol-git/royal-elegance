@@ -29,18 +29,19 @@ export function RoomAvailabilityChecker() {
     const supabase = createClient()
     
     // Get initial user
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      setUser(user)
+    supabase.auth.getUser().then(({ data }: { data: { user: SupabaseUser | null } }) => {
+      const u = (data as any)?.user ?? null
+      setUser(u)
     })
 
     // Subscribe to auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data } = supabase.auth.onAuthStateChange((_event: string, session: any) => {
       setUser(session?.user ?? null)
     })
 
-    return () => subscription.unsubscribe()
+    const subscription = (data as any)?.subscription ?? data
+
+    return () => subscription?.unsubscribe?.()
   }, [])
 
   useEffect(() => {
