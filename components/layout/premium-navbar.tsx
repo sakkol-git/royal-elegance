@@ -1,10 +1,10 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { X, Phone, Mail, User, Calendar, MapPin, ChevronRight} from "lucide-react"
+import { X, Phone, Mail, User, Calendar, MapPin, ChevronRight, Home, Bed, Gift } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import type { User as SupabaseUser } from "@supabase/supabase-js"
 
@@ -14,6 +14,8 @@ export function PremiumNavbar() {
   const [user, setUser] = useState<SupabaseUser | null>(null)
   const pathname = usePathname()
   const supabase = createClient()
+  const menuRef = useRef<HTMLDivElement | null>(null)
+  const firstLinkRef = useRef<HTMLAnchorElement | null>(null)
 
   // Handle scroll effect
   useEffect(() => {
@@ -58,11 +60,24 @@ export function PremiumNavbar() {
     return () => { document.body.style.overflow = 'unset' }
   }, [mobileMenuOpen])
 
+  // Close on Escape and focus management when opening mobile menu
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && mobileMenuOpen) setMobileMenuOpen(false)
+    }
+    if (mobileMenuOpen) {
+      window.addEventListener('keydown', onKey)
+      // focus the first menu item for keyboard users
+      setTimeout(() => firstLinkRef.current?.focus(), 50)
+    }
+    return () => window.removeEventListener('keydown', onKey)
+  }, [mobileMenuOpen])
+
   const navLinks = [
-    { href: user ? "/home" : "/", label: "Home" },
-    { href: "/rooms", label: "Rooms & Suites" },
-    { href: "/services", label: "Experiences" },
-    { href: "/bookings", label: "My Reservations" },
+    { href: user ? "/home" : "/", label: "Home", Icon: Home },
+    { href: "/rooms", label: "Rooms & Suites", Icon: Bed },
+    { href: "/services", label: "Experiences", Icon: Gift },
+    { href: "/bookings", label: "My Reservations", Icon: Calendar },
   ]
 
   return (
@@ -210,53 +225,50 @@ export function PremiumNavbar() {
         className={`fixed inset-0 z-40 lg:hidden bg-slate-950/95 backdrop-blur-xl transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] ${
           mobileMenuOpen ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-full pointer-events-none"
         }`}
+        onClick={() => setMobileMenuOpen(false)}
       >
-        <div className="flex flex-col h-full pt-32 px-6 pb-8">
-          {/* Mobile Links */}
-          <div className="flex flex-col gap-6 items-center justify-center flex-1">
-            {navLinks.map((link, index) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={`text-2xl font-display font-light tracking-wider transition-all duration-300 flex items-center gap-3 group ${
-                  mobileMenuOpen ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
-                }`}
-                style={{ transitionDelay: `${index * 100}ms` }}
-              >
-                <span className={pathname === link.href ? "text-[#d4af37]" : "text-white group-hover:text-[#d4af37]"}>
-                  {link.label}
-                </span>
-                {pathname === link.href && <div className="w-1.5 h-1.5 rounded-full bg-[#d4af37]" />}
-              </Link>
-            ))}
+        <div className="flex flex-col h-full pt-24 px-4 pb-6" onClick={(e) => e.stopPropagation()} ref={menuRef}>
+          {/* Mobile Links (full-width buttons) */}
+          <div className="flex flex-col gap-3 items-stretch justify-start flex-1">
+            {navLinks.map((link, index) => {
+              const Icon = (link as any).Icon as any
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  role="menuitem"
+                  tabIndex={0}
+                  ref={index === 0 ? firstLinkRef : undefined}
+                  className={`w-full flex items-center gap-3 text-left text-lg font-medium transition-all duration-150 py-4 px-4 rounded-md ${
+                    pathname === link.href ? 'bg-white/5 text-[#d4af37]' : 'text-white hover:bg-white/5 hover:text-[#d4af37]'
+                  }`}
+                  style={{ transitionDelay: `${index * 40}ms` }}
+                >
+                  {Icon && <Icon className="w-5 h-5 text-white/90" />}
+                  <span>{link.label}</span>
+                </Link>
+              )
+            })}
           </div>
 
           {/* Mobile Footer Actions */}
-          <div className="space-y-6 mt-auto max-w-sm mx-auto w-full">
+          <div className="space-y-4 mt-auto max-w-sm mx-auto w-full">
             <Link href="/rooms" className="block w-full">
-              <Button className="w-full bg-[#d4af37] text-black hover:bg-white hover:text-black h-12 text-sm tracking-widest uppercase">
+              <Button className="w-full bg-[#d4af37] text-black hover:bg-white hover:text-black h-14 text-sm tracking-widest uppercase shadow-lg">
                 Reserve Your Stay
               </Button>
             </Link>
-            
-            <div className="grid grid-cols-2 gap-4 pt-6 border-t border-white/10">
-              <a href="tel:+1234567890" className="flex flex-col items-center gap-2 text-white/60 hover:text-white transition-colors">
-                <Phone className="w-5 h-5" />
-                <span className="text-xs uppercase tracking-wider">Call Us</span>
-              </a>
-              <a href="mailto:info@hotel.com" className="flex flex-col items-center gap-2 text-white/60 hover:text-white transition-colors">
-                <Mail className="w-5 h-5" />
-                <span className="text-xs uppercase tracking-wider">Email</span>
-              </a>
-            </div>
 
-            {!user && (
-              <div className="text-center">
-                 <Link href="/login" className="text-sm text-[#d4af37] hover:text-white transition-colors flex items-center justify-center gap-1">
-                   Sign In to Your Account <ChevronRight className="w-3 h-3" />
-                 </Link>
-              </div>
-            )}
+            <div className="flex flex-col gap-3 items-center mt-2">
+              {user ? (
+                <>
+                  <Link href="/profile" className="w-full text-center py-3 rounded-md bg-white/5 text-white hover:text-[#d4af37] transition-colors">My Account</Link>
+                  <button onClick={async () => { await supabase.auth.signOut(); window.location.href = "/" }} className="w-full py-3 rounded-md bg-transparent border border-white/5 text-white hover:text-[#d4af37] transition-colors">Sign Out</button>
+                </>
+              ) : (
+                <Link href="/auth/login" className="w-full text-center py-3 rounded-md bg-transparent border border-white/5 text-white hover:bg-white/5 hover:text-[#d4af37] transition-colors">Sign In / Register</Link>
+              )}
+            </div>
           </div>
         </div>
       </div>
