@@ -29,20 +29,19 @@ export function VerifyEmail({ email }: VerifyEmailProps) {
     const supabase = createClient()
     
     // Get initial user
-    supabase.auth.getUser().then(async ({ data: { user } }) => {
-      setUser(user)
-      if (user?.email_confirmed_at) {
+    supabase.auth.getUser().then(async ({ data }: { data: { user: SupabaseUser | null } }) => {
+      const u = (data as any)?.user ?? null
+      setUser(u)
+      if (u?.email_confirmed_at) {
         setVerified(true)
-      } else if (!user && email) {
+      } else if (!u && email) {
         // Not signed in yet; start polling for post-verification session
         startPolling()
       }
     })
 
     // Subscribe to auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data } = supabase.auth.onAuthStateChange((_event: string, session: any) => {
       setUser(session?.user ?? null)
       if (session?.user?.email_confirmed_at) {
         setVerified(true)
@@ -50,8 +49,10 @@ export function VerifyEmail({ email }: VerifyEmailProps) {
       }
     })
 
+    const subscription = (data as any)?.subscription ?? data
+
     return () => {
-      subscription.unsubscribe()
+      subscription?.unsubscribe?.()
       stopPolling()
     }
   }, [])
@@ -61,9 +62,10 @@ export function VerifyEmail({ email }: VerifyEmailProps) {
     setPolling(true)
     const supabase = createClient()
     pollRef.current = setInterval(async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (user?.email_confirmed_at) {
-        setUser(user)
+      const { data }: { data: { user: SupabaseUser | null } } = await supabase.auth.getUser()
+      const u = (data as any)?.user ?? null
+      if (u?.email_confirmed_at) {
+        setUser(u)
         setVerified(true)
         stopPolling()
       }
