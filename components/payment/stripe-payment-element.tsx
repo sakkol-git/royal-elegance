@@ -18,6 +18,7 @@ type StripePaymentElementProps = {
 export function StripePaymentElementWrapper(props: StripePaymentElementProps) {
   const { bookingId, amount, currency = "usd", customerEmail } = props
   const [clientSecret, setClientSecret] = useState<string | null>(null)
+  const [markPaidToken, setMarkPaidToken] = useState<string | null>(null)
   const { toast } = useToast()
 
   const options = useMemo(() => ({
@@ -52,6 +53,7 @@ export function StripePaymentElementWrapper(props: StripePaymentElementProps) {
         }
         
         setClientSecret(data.clientSecret)
+        if (data.markPaidToken) setMarkPaidToken(data.markPaidToken)
       } catch (error: any) {
         console.error("[Payment] Failed to create payment intent:", error)
         toast({
@@ -68,12 +70,12 @@ export function StripePaymentElementWrapper(props: StripePaymentElementProps) {
 
   return (
     <Elements stripe={stripePromise} options={options}>
-      <StripePaymentElementInner bookingId={props.bookingId} />
+      <StripePaymentElementInner bookingId={props.bookingId} markPaidToken={markPaidToken} />
     </Elements>
   )
 }
 
-function StripePaymentElementInner({ bookingId }: { bookingId: string }) {
+function StripePaymentElementInner({ bookingId, markPaidToken }: { bookingId: string; markPaidToken?: string | null }) {
   const stripe = useStripe()
   const elements = useElements()
   const { toast } = useToast()
@@ -108,6 +110,36 @@ function StripePaymentElementInner({ bookingId }: { bookingId: string }) {
           title: "Payment successful!",
           description: "Your booking has been confirmed.",
         })
+
+        // Attempt a best-effort immediate mark-paid call using the short-lived
+        // token returned when creating the payment intent. This is a pragmatic
+        // way to update the booking status in the UI immediately; the Stripe
+        // webhook is still the authoritative source of truth.
+        try {
+          // Stripe typings may not include `amount_received` on PaymentIntent in this SDK
+          // version; use a type cast to access it if present, otherwise fall back to
+          // `amount`.
+          const paidRaw = (paymentIntent as any)?.amount_received ?? paymentIntent?.amount ?? 0
+          const paidAmount = (paidRaw ?? 0) / 100
+          const body: any = { bookingId, paidAmount, paymentMethod: 'credit_card' }
+          if (markPaidToken) body.markPaidToken = markPaidToken
+
+          const res = await fetch('/api/bookings/mark-paid', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+          })
+
+          if (!res.ok) {
+            const err = await res.json().catch(() => ({}))
+            console.warn('[Payment] mark-paid call returned non-OK', res.status, err)
+          } else {
+            console.log('[Payment] mark-paid succeeded (best-effort)')
+          }
+        } catch (err) {
+          console.warn('[Payment] mark-paid call failed (best-effort):', err)
+        }
+
         // Redirect to confirmation page
         window.location.href = `/booking-confirmation?id=${bookingId}`
       }

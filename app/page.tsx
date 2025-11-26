@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client"
 import { PremiumNavbar } from "@/components/layout/premium-navbar"
 import { PremiumHeroSection } from "@/components/landing/premium-hero-section"
 import SEO from "@/components/ui/SEO"
+import Loading from "@/components/ui/loading"
 
 export default function LandingPage() {
   const router = useRouter()
@@ -53,14 +54,7 @@ export default function LandingPage() {
   }, [router, authChecked])
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-900">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-white border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-white">Loading...</p>
-        </div>
-      </div>
-    )
+    return <Loading message="Loading..." size="lg" />
   }
 
   return (

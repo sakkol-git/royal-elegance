@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client"
 import type { User as SupabaseUser } from "@supabase/supabase-js"
 import { PremiumNavbar } from "@/components/layout/premium-navbar"
 import { ServiceBookingForm } from "@/components/user/service-booking-form"
+import Loading from "@/components/ui/loading"
 import type { Service } from "@/lib/types"
 import { getServices } from "@/lib/supabase-service"
 
@@ -23,7 +24,7 @@ export default function ServiceBookingPage() {
     const supabase = createClient()
     
     // Get initial user
-    supabase.auth.getUser().then(({ data: { user } }) => {
+    supabase.auth.getUser().then(({ data: { user } }: { data: { user: SupabaseUser | null } }) => {
       setUser(user)
       setLoading(false)
       
@@ -34,16 +35,15 @@ export default function ServiceBookingPage() {
     })
 
     // Subscribe to auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data } = supabase.auth.onAuthStateChange((_event: string, session: any) => {
       setUser(session?.user ?? null)
       if (!session?.user) {
         router.push("/login")
       }
     })
 
-    return () => subscription.unsubscribe()
+    const subscription = (data as any)?.subscription ?? data
+    return () => subscription?.unsubscribe?.()
   }, [router])
 
   useEffect(() => {
@@ -77,11 +77,7 @@ export default function ServiceBookingPage() {
   }, [serviceId, router])
 
   if (loading || loadingService) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-      </div>
-    )
+    return <Loading message="Loading service..." size="lg" />
   }
 
   if (!service) {

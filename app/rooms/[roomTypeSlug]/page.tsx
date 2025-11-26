@@ -5,6 +5,7 @@ import { useRouter, useParams } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import type { User as SupabaseUser } from "@supabase/supabase-js"
 import { PremiumNavbar } from "@/components/layout/premium-navbar"
+import Loading from "@/components/ui/loading"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -32,11 +33,12 @@ export default function RoomTypeDetailPage() {
     }
     getUser()
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data } = supabase.auth.onAuthStateChange((_event: string, session: any) => {
       setUser(session?.user ?? null)
     })
 
-    return () => subscription.unsubscribe()
+    const subscription = (data as any)?.subscription ?? data
+    return () => subscription?.unsubscribe?.()
   }, [supabase])
 
   useEffect(() => {
@@ -144,11 +146,7 @@ export default function RoomTypeDetailPage() {
   }
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-      </div>
-    )
+    return <Loading message="Loading room type..." size="lg" />
   }
 
   if (!roomType) {

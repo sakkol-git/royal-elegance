@@ -29,18 +29,17 @@ export function ServiceBookingForm({ service, onBack }: ServiceBookingFormProps)
     const supabase = createClient()
     
     // Get initial user
-    supabase.auth.getUser().then(({ data: { user } }) => {
+    supabase.auth.getUser().then(({ data: { user } }: { data: { user: SupabaseUser | null } }) => {
       setUser(user)
     })
 
     // Subscribe to auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data } = supabase.auth.onAuthStateChange((_event: string, session: any) => {
       setUser(session?.user ?? null)
     })
 
-    return () => subscription.unsubscribe()
+    const subscription = (data as any)?.subscription ?? data
+    return () => subscription?.unsubscribe?.()
   }, [])
 
   const [serviceDate, setServiceDate] = useState("")

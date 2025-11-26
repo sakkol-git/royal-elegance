@@ -8,11 +8,10 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { CreditCard, Lock, QrCode, Smartphone } from "lucide-react"
+import { CreditCard, Lock, Smartphone } from "lucide-react"
 // Legacy mock credit card + KHQR form retained temporarily; slated for removal after Stripe fully replaces usage.
 // TODO: Remove this component once all flows use StripePaymentElementWrapper and KHQR direct integration.
 // import { mockPayment } from "@/lib/mock-payment"
-import { KHQRPayment } from "./khqr-payment"
 import { useToast } from "@/hooks/use-toast"
 
 interface EnhancedPaymentFormProps {
@@ -23,7 +22,7 @@ interface EnhancedPaymentFormProps {
 }
 
 export function EnhancedPaymentForm({ amount, bookingReference = '', onSuccess, onCancel }: EnhancedPaymentFormProps) {
-  const [paymentMethod, setPaymentMethod] = useState<'card' | 'khqr'>('card')
+  const [paymentMethod, setPaymentMethod] = useState<'card'>('card')
   const [cardNumber, setCardNumber] = useState("")
   const [cardName, setCardName] = useState("")
   const [expiryMonth, setExpiryMonth] = useState("")
@@ -78,8 +77,8 @@ export function EnhancedPaymentForm({ amount, bookingReference = '', onSuccess, 
       </CardHeader>
 
       <CardContent className="p-4 sm:p-6 pt-4">
-        <Tabs value={paymentMethod} onValueChange={(value) => setPaymentMethod(value as 'card' | 'khqr')}>
-          <TabsList className="grid !w-full grid-cols-2 mb-6 glass-card !h-12 p-1">
+        <Tabs value={paymentMethod} onValueChange={(value) => setPaymentMethod(value as 'card')}>
+          <TabsList className="grid !w-full grid-cols-1 mb-6 glass-card !h-12 p-1">
             <TabsTrigger 
               value="card" 
               className="flex items-center justify-center gap-1.5 sm:gap-2 text-sm font-medium !h-10 px-2 sm:px-3 data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm transition-all duration-200 min-w-0"
@@ -88,16 +87,6 @@ export function EnhancedPaymentForm({ amount, bookingReference = '', onSuccess, 
               <span className="truncate">
                 <span className="hidden sm:inline">Credit Card</span>
                 <span className="sm:hidden">Card</span>
-              </span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="khqr" 
-              className="flex items-center justify-center gap-1.5 sm:gap-2 text-sm font-medium !h-10 px-2 sm:px-3 data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm transition-all duration-200 min-w-0"
-            >
-              <QrCode className="w-4 h-4 shrink-0" />
-              <span className="truncate">
-                <span className="hidden sm:inline">KHQR Payment</span>
-                <span className="sm:hidden">KHQR</span>
               </span>
             </TabsTrigger>
           </TabsList>
@@ -234,14 +223,7 @@ export function EnhancedPaymentForm({ amount, bookingReference = '', onSuccess, 
             </div>
           </TabsContent>
 
-          <TabsContent value="khqr" className="mt-0 -mx-4 sm:-mx-6 -mb-4 sm:-mb-6">
-            <KHQRPayment 
-              amount={amount}
-              bookingReference={bookingReference}
-              onSuccess={onSuccess}
-              onCancel={onCancel}
-            />
-          </TabsContent>
+          {/* KHQR payment removed - use Stripe Payment Element or other flows */}
         </Tabs>
       </CardContent>
     </Card>

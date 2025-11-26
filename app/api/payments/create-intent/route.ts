@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import Stripe from "stripe"
+import crypto from "crypto"
 
 // Force Node.js runtime (Stripe SDK requires Node, not Edge)
 export const runtime = "nodejs"
@@ -57,7 +58,23 @@ export async function POST(req: NextRequest) {
       }
     )
 
-    return NextResponse.json({ clientSecret: intent.client_secret })
+    // Generate a short-lived signed token that the client can use to call the
+    // `mark-paid` endpoint immediately after confirming payment. This token is
+    // HMAC-signed using MARK_PAID_SECRET and embeds the bookingId + expiry.
+    const markPaidSecret = process.env.MARK_PAID_SECRET || process.env.STRIPE_SECRET_KEY || ""
+    let markPaidToken: string | undefined = undefined
+    try {
+      if (markPaidSecret) {
+        const payload = JSON.stringify({ bookingId, exp: Date.now() + 5 * 60 * 1000 }) // 5 minutes
+        const payloadB64 = Buffer.from(payload).toString("base64url")
+        const sig = crypto.createHmac("sha256", markPaidSecret).update(payloadB64).digest("base64url")
+        markPaidToken = `${payloadB64}.${sig}`
+      }
+    } catch (err) {
+      console.warn("[Stripe] Failed to create mark-paid token:", err)
+    }
+
+    return NextResponse.json({ clientSecret: intent.client_secret, markPaidToken })
   } catch (err: any) {
     console.error("[Stripe] create-intent error:", err)
     return NextResponse.json({ error: err.message || "Internal error" }, { status: 500 })

@@ -1,5 +1,19 @@
 "use client"
 
+interface Profile {
+  role: string
+}
+
+interface PaymentPageContentState {
+  user: SupabaseUser | null
+  loading: boolean
+  bookings: Booking[]
+  rooms: Room[]
+  roomTypes: RoomType[]
+  services: Service[]
+  booking: Booking | null
+}
+
 import { useEffect, useState, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
@@ -9,6 +23,7 @@ import type { Booking, Room, RoomType, Service } from "@/lib/types"
 import { PremiumNavbar } from "@/components/layout/premium-navbar"
 import { StripePaymentElementWrapper } from "@/components/payment/stripe-payment-element"
 import { TestCardInfo } from "@/components/payment/test-card-info"
+import Loading from "@/components/ui/loading"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 
@@ -29,7 +44,7 @@ function PaymentPageContent() {
     const supabase = createClient()
     
     // Get initial user
-    supabase.auth.getUser().then(({ data: { user } }) => {
+    supabase.auth.getUser().then(({ data: { user } }: { data: { user: SupabaseUser | null } }) => {
       setUser(user)
       setLoading(false)
       if (!user) {
@@ -38,13 +53,12 @@ function PaymentPageContent() {
     })
 
     // Subscribe to auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data } = supabase.auth.onAuthStateChange((_event: string, session: any) => {
       setUser(session?.user ?? null)
     })
 
-    return () => subscription.unsubscribe()
+    const subscription = (data as any)?.subscription ?? data
+    return () => subscription?.unsubscribe?.()
   }, [router])
 
   // Fetch booking data
@@ -98,11 +112,7 @@ function PaymentPageContent() {
   }
 
   if (loading || !booking) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-      </div>
-    )
+    return <Loading message="Loading payment details..." size="lg" />
   }
 
   const room = rooms.find((r) => r.id === booking.roomId)
@@ -190,9 +200,7 @@ function PaymentPageContent() {
 export default function PaymentPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-      </div>
+      <Loading message="Preparing payment..." size="lg" />
     }>
       <PaymentPageContent />
     </Suspense>

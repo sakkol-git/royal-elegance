@@ -34,5 +34,17 @@ export function createClient() {
     }
   }
 
+  // On the browser, reuse a single client instance to avoid creating multiple
+  // GoTrueClient instances (which warn: "Multiple GoTrueClient instances detected...")
+  // Store the client on globalThis so React StrictMode or HMR won't create duplicates.
+  if (typeof window !== 'undefined') {
+    const g: any = globalThis
+    if (!g.__supabase_client) {
+      g.__supabase_client = createBrowserClient(url, anon)
+    }
+    return g.__supabase_client
+  }
+
+  // On the server, return a fresh client (server components or server routes).
   return createBrowserClient(url, anon)
 }

@@ -110,7 +110,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // Listen for auth changes
     if (supabase) {
-      const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, newSession) => {
+  const { data } = supabase.auth.onAuthStateChange(async (event: string, newSession: any) => {
         console.log("=== AUTH STATE CHANGE ===")
         console.log("Event:", event)
         console.log("Session:", newSession ? "present" : "null")
@@ -147,8 +147,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.log("=== AUTH STATE CHANGE COMPLETE ===")
       })
 
+      const subscription = (data as any)?.subscription ?? data
       return () => {
-        subscription.unsubscribe()
+        subscription?.unsubscribe?.()
       }
     }
   }, [])

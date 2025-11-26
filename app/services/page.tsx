@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client"
 import type { User as SupabaseUser } from "@supabase/supabase-js"
 import { PremiumNavbar } from "@/components/layout/premium-navbar"
 import { ServiceCard } from "@/components/user/service-card"
+import Loading from "@/components/ui/loading"
 import type { Service, ServiceCategory } from "@/lib/types"
 import { getServices, getServiceCategories } from "@/lib/supabase-service"
 import { Button } from "@/components/ui/button"
@@ -27,18 +28,17 @@ export default function ServicesPage() {
     const supabase = createClient()
     
     // Get initial user
-    supabase.auth.getUser().then(({ data: { user } }) => {
+    supabase.auth.getUser().then(({ data: { user } }: { data: { user: SupabaseUser | null } }) => {
       setUser(user)
     })
 
     // Subscribe to auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data } = supabase.auth.onAuthStateChange((_event: string, session: any) => {
       setUser(session?.user ?? null)
     })
 
-    return () => subscription.unsubscribe()
+    const subscription = (data as any)?.subscription ?? data
+    return () => subscription?.unsubscribe?.()
   }, [])
 
   useEffect(() => {
@@ -106,11 +106,7 @@ export default function ServicesPage() {
   }
 
   if (loadingServices || loadingCategories) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-      </div>
-    )
+    return <Loading message="Loading services..." size="lg" />
   }
 
   return (

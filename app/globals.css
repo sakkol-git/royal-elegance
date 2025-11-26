@@ -120,11 +120,18 @@
 }
 
 @layer base {
+  /* Global typographic baseline: slightly smaller for a denser, consistent UI */
+  html {
+    font-size: 16px; /* 14px base instead of 16px */
+  }
   * {
     @apply border-border outline-ring/50;
   }
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-sans);
+    font-size: 0.875rem; /* 14px base (1rem) to keep tailwind rem sizing consistent */
+    line-height: 1.45;
     font-feature-settings: "kern" 1, "liga" 1;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -250,9 +257,9 @@
   .tabs-list {
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.9) 100%);
     backdrop-filter: blur(20px) saturate(180%);
-    border: 2px solid rgba(212, 175, 55, 0.25);
+    border: 2px solid rgba(3, 3, 3, 0.25);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1), 
-                0 0 3px rgba(212, 175, 55, 0.3) inset;
+                0 0 3px rgba(0, 0, 0, 0.3) inset;
     border-radius: 12px;
     padding: 6px;
   }
@@ -271,7 +278,7 @@
   }
 
   .tabs-trigger[data-state="active"] {
-    background: linear-gradient(135deg, rgba(212, 175, 55, 0.2) 0%, rgba(255, 255, 255, 0.9) 50%, rgba(212, 175, 55, 0.15) 100%);
+    background: linear-gradient(135deg, rgba(116, 97, 35, 0.712) 0%, rgba(255, 255, 255, 0.9) 50%, rgba(212, 175, 55, 0.15) 100%);
     border: 1.5px solid rgba(212, 175, 55, 0.4);
     box-shadow: 0 4px 12px rgba(212, 175, 55, 0.2), 
                 0 0 2px rgba(212, 175, 55, 0.5) inset;
@@ -488,17 +495,19 @@
   }
 
   /* Gold accent utilities (Raffles luxury) */
+  /* Accent utilities updated to match the premium navbar dark-blue */
   .accent-gold {
-    color: #d4af37;
+    /* matches the premium navbar background (slate-900) */
+    color: #0f1724;
   }
 
   .border-gold {
-    border-color: rgba(212, 175, 55, 0.3);
+    border-color: rgba(15, 23, 36, 0.3);
   }
 
   .hover-gold:hover {
-    color: #d4af37;
-    border-color: rgba(212, 175, 55, 0.5);
+    color: #0f1724;
+    border-color: rgba(15, 23, 36, 0.5);
   }
 
   /* Premium Animations with smooth easing */

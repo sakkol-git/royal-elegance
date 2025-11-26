@@ -10,6 +10,7 @@ import Image from "next/image"
 import { getBookingsByUser, getRoomTypes, getRooms } from "@/lib/supabase-service"
 import type { Booking, RoomType, Room } from "@/lib/types"
 import { PremiumNavbar } from "@/components/layout/premium-navbar"
+import Loading from "@/components/ui/loading"
 
 interface User {
   id: string
@@ -108,11 +109,7 @@ export default function UserHomePage() {
   }, [user, loading, router])
 
   if (!mounted || loading || loadingData || !user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-accent/5 to-background">
-        <div className="w-16 h-16 border-4 border-[#d4af37] border-t-transparent rounded-full animate-spin" />
-      </div>
-    )
+    return <Loading message="Loading home..." size="lg" />
   }
 
   // Filter upcoming bookings (same logic as bookings page)

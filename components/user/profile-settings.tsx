@@ -41,24 +41,25 @@ export function ProfileSettings() {
     const supabase = createClient()
     
     // Get initial user
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      setUser(user)
-      if (user?.user_metadata?.full_name) {
-        setFullName(user.user_metadata.full_name)
+    supabase.auth.getUser().then(({ data }: { data: { user: SupabaseUser | null } }) => {
+      const u = (data as any)?.user ?? null
+      setUser(u)
+      if (u?.user_metadata?.full_name) {
+        setFullName(u.user_metadata.full_name)
       }
-      if (user?.user_metadata?.phone) {
-        setPhone(user.user_metadata.phone)
+      if (u?.user_metadata?.phone) {
+        setPhone(u.user_metadata.phone)
       }
     })
 
     // Subscribe to auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data } = supabase.auth.onAuthStateChange((_event: string, session: any) => {
       setUser(session?.user ?? null)
     })
 
-    return () => subscription.unsubscribe()
+    const subscription = (data as any)?.subscription ?? data
+
+    return () => subscription?.unsubscribe?.()
   }, [])
 
   useEffect(() => {
@@ -84,9 +85,10 @@ export function ProfileSettings() {
   const resendEmailVerification = async () => {
     const supabase = createClient()
     // Resend verification email logic
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser()
+    const user = (data as any)?.user ?? null
     if (!user?.email) throw new Error("No email found")
-    
+
     // In a real app, call your email sending API
     // For now just notify user
     return Promise.resolve()

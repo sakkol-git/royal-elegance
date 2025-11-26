@@ -7,13 +7,26 @@ import type { User as SupabaseUser } from "@supabase/supabase-js"
 import { getBookings, getBookingsByUser, getRooms, getRoomTypes, getServices } from "@/lib/supabase-service"
 import type { Booking, Room, RoomType, Service } from "@/lib/types"
 import { PremiumNavbar } from "@/components/layout/premium-navbar"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { CheckCircle2, Hotel, Sparkles, Calendar, Users, DollarSign, Copy, Check, AlertCircle } from "lucide-react"
+import { 
+  CheckCircle2, Hotel, Sparkles, Calendar, Users, 
+  DollarSign, Copy, Check, AlertCircle, Printer, 
+  Share2, MapPin, QrCode, Phone, Mail 
+} from "lucide-react"
 import Link from "next/link"
 import { useToast } from "@/hooks/use-toast"
+import Loading from "@/components/ui/loading"
+
+// Helper function to format currency
+const formatCurrency = (amount: number) => {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+  }).format(amount)
+}
 
 function BookingConfirmationContent() {
   const [user, setUser] = useState<SupabaseUser | null>(null)
@@ -30,59 +43,35 @@ function BookingConfirmationContent() {
   const [loadingData, setLoadingData] = useState(true)
   const [copiedRef, setCopiedRef] = useState(false)
 
-  // Initialize auth
+  // ... (Keep existing Authentication and Data Fetching logic unchanged) ...
   useEffect(() => {
     const supabase = createClient()
-    
-    // Get initial user
-    supabase.auth.getUser().then(({ data: { user } }) => {
+    supabase.auth.getUser().then(({ data: { user } }: { data: { user: SupabaseUser | null } }) => {
       setUser(user)
       setLoading(false)
-      if (!user) {
-        router.push("/")
-      }
+      if (!user) router.push("/")
     })
-
-    // Subscribe to auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data } = supabase.auth.onAuthStateChange((_event: string, session: any) => {
       setUser(session?.user ?? null)
     })
-
-    return () => subscription.unsubscribe()
+    const subscription = (data as any)?.subscription ?? data
+    return () => subscription?.unsubscribe?.()
   }, [router])
 
-  // Fetch booking data
   useEffect(() => {
     const fetchData = async () => {
       if (!user) return
-
       try {
         const supabase = createClient()
-        
-        console.log("Fetching booking confirmation for ID:", bookingId)
-        
-        // Fetch booking directly with authenticated client for RLS
         const { data: bookingData, error: bookingError } = await supabase
           .from("bookings")
           .select("*")
           .eq("id", bookingId)
           .single()
 
-        if (bookingError) {
-          console.error("Booking fetch error:", bookingError)
-          throw bookingError
-        }
+        if (bookingError) throw bookingError
+        if (!bookingData) throw new Error("Booking not found")
 
-        if (!bookingData) {
-          console.error("No booking data returned for ID:", bookingId)
-          throw new Error("Booking not found")
-        }
-
-        console.log("Fetched booking from database:", bookingData)
-
-        // Convert timestamps and field names
         const targetBooking: Booking = {
           id: bookingData.id,
           bookingReference: bookingData.booking_reference,
@@ -96,8 +85,8 @@ function BookingConfirmationContent() {
           roomTypeId: bookingData.room_type_id,
           checkInDate: new Date(bookingData.check_in_date),
           checkOutDate: new Date(bookingData.check_out_date),
-          checkIn: new Date(bookingData.check_in_date), // Backward compatibility
-          checkOut: new Date(bookingData.check_out_date), // Backward compatibility
+          checkIn: new Date(bookingData.check_in_date),
+          checkOut: new Date(bookingData.check_out_date),
           status: bookingData.status,
           roomPrice: bookingData.room_price,
           servicesPrice: bookingData.services_price,
@@ -111,14 +100,10 @@ function BookingConfirmationContent() {
           services: bookingData.services || [],
         }
 
-        console.log("Converted booking:", targetBooking)
         setBooking(targetBooking)
 
-        // Fetch related data
         const [allRooms, allRoomTypes, allServices] = await Promise.all([
-          getRooms(),
-          getRoomTypes(),
-          getServices(),
+          getRooms(), getRoomTypes(), getServices(),
         ])
 
         setRooms(allRooms)
@@ -126,19 +111,66 @@ function BookingConfirmationContent() {
         setServices(allServices)
 
       } catch (error) {
-        console.error("Error fetching booking data:", error)
-        toast({
-          title: "Error",
-          description: "Failed to load booking confirmation.",
-          variant: "destructive",
-        })
+        toast({ title: "Error", description: "Failed to load booking.", variant: "destructive" })
       } finally {
         setLoadingData(false)
       }
     }
+    if (user && bookingId) fetchData()
+    // Subscribe to realtime updates for this booking so the UI reflects status
+    // changes (e.g., when a payment webhook or client mark-paid updates the row).
+    let channel: any = null
+    if (bookingId) {
+      const supabase = createClient()
+      channel = supabase
+        .channel(`booking-${bookingId}`)
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'bookings', filter: `id=eq.${bookingId}` }, async (payload: any) => {
+          try {
+            // Re-fetch latest booking row
+            const { data: latest, error } = await supabase.from('bookings').select('*').eq('id', bookingId).single()
+            if (!error && latest) {
+              const updated: Booking = {
+                id: latest.id,
+                bookingReference: latest.booking_reference,
+                userId: latest.user_id,
+                guestName: latest.guest_name,
+                guestEmail: latest.guest_email,
+                guestPhone: latest.guest_phone,
+                guestCount: latest.guest_count,
+                guests: latest.guest_count,
+                roomId: latest.room_id,
+                roomTypeId: latest.room_type_id,
+                checkInDate: new Date(latest.check_in_date),
+                checkOutDate: new Date(latest.check_out_date),
+                checkIn: new Date(latest.check_in_date),
+                checkOut: new Date(latest.check_out_date),
+                status: latest.status,
+                roomPrice: latest.room_price,
+                servicesPrice: latest.services_price,
+                totalPrice: latest.total_price,
+                paymentStatus: latest.payment_status,
+                paymentMethod: latest.payment_method,
+                paidAmount: latest.paid_amount,
+                bookingType: latest.room_id ? 'room' : 'service',
+                createdAt: new Date(latest.created_at),
+                updatedAt: latest.updated_at ? new Date(latest.updated_at) : undefined,
+                services: latest.services || [],
+              }
+              setBooking(updated)
+            }
+          } catch (err) {
+            console.warn('Realtime booking update failed to fetch latest row', err)
+          }
+        })
+        .subscribe()
+    }
 
-    if (user && bookingId) {
-      fetchData()
+    return () => {
+      try {
+        if (channel) channel.unsubscribe()
+      } catch (e) {
+        /* ignore */
+      }
     }
   }, [user, bookingId, toast])
 
@@ -146,72 +178,31 @@ function BookingConfirmationContent() {
     if (booking?.bookingReference) {
       navigator.clipboard.writeText(booking.bookingReference)
       setCopiedRef(true)
-      toast({
-        title: "Copied!",
-        description: "Booking reference copied to clipboard.",
-      })
+      toast({ title: "Copied!", description: "Reference copied." })
       setTimeout(() => setCopiedRef(false), 2000)
     }
   }
 
-  if (loading || loadingData) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-      </div>
-    )
+  const handlePrint = () => {
+    window.print()
   }
 
-  if (!user) {
-    return null
-  }
+  if (loading || loadingData) return <Loading message="Finalizing your reservation..." size="lg" />
+  if (!user) return null
 
+  // Error State
   if (!booking) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-background">
+      <div className="min-h-screen bg-neutral-50">
         <PremiumNavbar />
-        <main className="container mx-auto px-4 py-8" style={{ marginTop: "112px" }}>
-          <Card className="glass-card max-w-2xl mx-auto border-0 animate-fade-in-scale">
-            <CardContent className="pt-6 text-center space-y-4 bg-white/95">
-              <AlertCircle className="w-16 h-16 mx-auto text-amber-500" />
-              <h2 className="text-2xl font-bold">Booking Not Found</h2>
-              <p className="text-muted-foreground">
-                {bookingId 
-                  ? `We couldn't find booking ID: ${bookingId}. It may still be processing.`
-                  : "No booking ID provided."}
-              </p>
-              <div className="flex gap-4 justify-center flex-wrap">
-                <Button 
-                  onClick={() => window.location.reload()}
-                  variant="outline"
-                  className="gap-2"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                  </svg>
-                  Retry
-                </Button>
-                <Link href="/bookings">
-                  <Button variant="outline">
-                    <Calendar className="w-4 h-4 mr-2" />
-                    View My Bookings
-                  </Button>
-                </Link>
-                <Link href="/rooms">
-                  <Button className="glass-button hover:border-[#d4af37]">
-                    <Hotel className="w-4 h-4 mr-2" />
-                    Browse Rooms
-                  </Button>
-                </Link>
-                <Link href="/services">
-                  <Button variant="outline" className="glass-button hover:border-[#d4af37]">
-                    <Sparkles className="w-4 h-4 mr-2" />
-                    Browse Services
-                  </Button>
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
+        <main className="container mx-auto px-4 py-8 mt-28">
+           <Card className="max-w-md mx-auto border-none shadow-xl">
+               <CardContent className="flex flex-col items-center p-8 text-center">
+                <AlertCircle className="w-12 h-12 text-red-500 mb-4" />
+                <h2 className="text-xl font-display font-bold mb-2">Booking Not Found</h2>
+                <Button onClick={() => window.location.reload()}>Retry</Button>
+             </CardContent>
+           </Card>
         </main>
       </div>
     )
@@ -220,220 +211,250 @@ function BookingConfirmationContent() {
   const room = booking.roomId ? rooms.find((r) => r.id === booking.roomId) : null
   const roomType = room ? roomTypes.find((rt) => rt.id === room.roomTypeId) : null
   const bookingServices = booking.services.length > 0 ? services.filter((s) => booking.services.includes(s.id)) : []
-
   const isRoomBooking = booking.bookingType === "room" || booking.bookingType === "both"
-  const isServiceBooking = booking.bookingType === "service" || booking.bookingType === "both"
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-background">
+    <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-background print:bg-white">
       <PremiumNavbar />
-      <main className="container mx-auto px-4 py-8" style={{ marginTop: "112px" }}>
-        <Card className="glass-banner max-w-3xl mx-auto border-0 animate-fade-in-scale">
-          <CardHeader className="text-center bg-gradient-to-br from-white/95 to-background-accent/20">
-            <div className="flex justify-center mb-4">
-              <div className="w-20 h-20 rounded-full glass flex items-center justify-center animate-pulse border-2 border-[#d4af37]/30">
-                <CheckCircle2 className="w-12 h-12 text-[#d4af37]" />
-              </div>
+      
+      <main className="container mx-auto px-4 py-8 print:p-0 print:m-0" style={{ marginTop: "112px" }}>
+        
+  {/* Main Luxury Card Container (smaller) */}
+  <div className="max-w-2xl mx-auto animate-fade-in-up">
+          
+          {/* Card Actions (Non-printable) */}
+          <div className="flex justify-between items-center mb-6 print:hidden">
+            <Link href="/bookings" className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-2">
+              ← Back to Dashboard
+            </Link>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" className="gap-2 bg-white" onClick={handlePrint}>
+                <Printer className="w-4 h-4" /> Print
+              </Button>
+              <Button variant="outline" size="sm" className="gap-2 bg-white">
+                <Share2 className="w-4 h-4" /> Share
+              </Button>
             </div>
-            <CardTitle className="text-4xl font-display bg-gradient-to-r from-[#d4af37] to-[#f4d03f] bg-clip-text text-transparent">
-              Booking Confirmed!
-            </CardTitle>
-            <CardDescription className="text-base mt-2">
-              Your reservation has been successfully created. We look forward to welcoming you.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {/* Booking Reference */}
-            <div className="glass p-4 rounded-lg">
-              <div className="flex items-center justify-between">
+          </div>
+
+          <Card className="border-0 shadow-xl overflow-hidden bg-white print:shadow-none">
+            {/* Gold Accent Top Bar */}
+            <div className="h-2 bg-gradient-to-r from-[#d4af37] via-[#f4d03f] to-[#d4af37]" />
+
+            <CardContent className="p-0">
+              
+              {/* Header Section */}
+              <div className="p-6 md:p-8 border-b border-neutral-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                  <p className="text-sm text-muted-foreground mb-1">Booking Reference</p>
-                  <p className="text-2xl font-mono font-bold">{booking.bookingReference}</p>
+                  <div className="flex items-center gap-2 text-[#d4af37] mb-2">
+                    <CheckCircle2 className="w-5 h-5 fill-[#d4af37] text-white" />
+                    <span className="font-semibold tracking-wide uppercase text-xs">Reservation Confirmed</span>
+                  </div>
+                  <h1 className="text-2xl md:text-3xl font-display font-medium text-slate-900">
+                    {isRoomBooking ? "Hotel Reservation" : "Service Appointment"}
+                  </h1>
+                  <p className="text-slate-500 mt-1 flex items-center gap-2 text-sm">
+                    <MapPin className="w-4 h-4" /> Luxury Hotel & Spa, Cambodia
+                  </p>
                 </div>
-                <Button variant="outline" size="icon" onClick={handleCopyReference}>
-                  {copiedRef ? <Check className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4" />}
-                </Button>
-              </div>
-              <p className="text-xs text-muted-foreground mt-2">
-                Please save this reference number for your records
-              </p>
-            </div>
-
-            {/* Booking Type Badge */}
-            <div className="flex items-center justify-center gap-2">
-              {isRoomBooking && (
-                <Badge className="bg-blue-500/20 text-blue-700 gap-1">
-                  <Hotel className="w-3 h-3" />
-                  Room Booking
-                </Badge>
-              )}
-              {isServiceBooking && (
-                <Badge className="bg-purple-500/20 text-purple-700 gap-1">
-                  <Sparkles className="w-3 h-3" />
-                  Service Booking
-                </Badge>
-              )}
-              <Badge className="bg-green-500/20 text-green-700 gap-1">
-                <CheckCircle2 className="w-3 h-3" />
-                Confirmed
-              </Badge>
-            </div>
-
-            {/* Room Details */}
-            {isRoomBooking && roomType && (
-              <div className="glass p-6 rounded-lg space-y-4">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h3 className="font-semibold text-xl flex items-center gap-2">
-                      <Hotel className="w-5 h-5" />
-                      {roomType.name}
-                    </h3>
-                    {room && <p className="text-sm text-muted-foreground mt-1">Room {room.roomNumber}</p>}
-                  </div>
-                </div>
-
-                <Separator />
-
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div className="flex items-start gap-2">
-                    <Calendar className="w-4 h-4 text-muted-foreground mt-0.5" />
-                    <div>
-                      <p className="text-muted-foreground">Check-in</p>
-                      <p className="font-semibold">{new Date(booking.checkIn).toLocaleDateString()}</p>
-                      <p className="text-xs text-muted-foreground">After 3:00 PM</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <Calendar className="w-4 h-4 text-muted-foreground mt-0.5" />
-                    <div>
-                      <p className="text-muted-foreground">Check-out</p>
-                      <p className="font-semibold">{new Date(booking.checkOut).toLocaleDateString()}</p>
-                      <p className="text-xs text-muted-foreground">Before 11:00 AM</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <Users className="w-4 h-4 text-muted-foreground mt-0.5" />
-                    <div>
-                      <p className="text-muted-foreground">Guests</p>
-                      <p className="font-semibold">{booking.guests}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <DollarSign className="w-4 h-4 text-muted-foreground mt-0.5" />
-                    <div>
-                      <p className="text-muted-foreground">Room Price</p>
-                      <p className="font-semibold text-lg">${roomType.basePrice}</p>
-                    </div>
+                
+                <div className="text-right">
+                  <p className="text-xs text-slate-400 uppercase tracking-wider mb-1">Booking Reference</p>
+                  <div className="flex items-center gap-3 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100">
+                    <span className="font-mono text-lg font-bold text-slate-900 tracking-widest">
+                      {booking.bookingReference}
+                    </span>
+                    <button onClick={handleCopyReference} className="text-slate-400 hover:text-[#d4af37] transition-colors">
+                      {copiedRef ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                    </button>
                   </div>
                 </div>
               </div>
-            )}
 
-            {/* Service Details */}
-            {isServiceBooking && bookingServices.length > 0 && (
-              <div className="glass p-6 rounded-lg space-y-4">
-                <h3 className="font-semibold text-xl flex items-center gap-2">
-                  <Sparkles className="w-5 h-5" />
-                  {booking.bookingType === "service" ? "Service Booking" : "Additional Services"}
-                </h3>
-
-                <Separator />
-
-                <div className="space-y-3">
-                  {bookingServices.map((service) => (
-                    <div key={service.id} className="flex items-center justify-between p-3 rounded-lg bg-background/50">
-                      <div>
-                        <p className="font-semibold">{service.name}</p>
-                        <p className="text-sm text-muted-foreground">{service.description}</p>
-                        <Badge className="mt-1 capitalize text-xs">{service.category}</Badge>
+              {/* Main Content Grid */}
+              <div className="flex flex-col md:flex-row">
+                
+                {/* Left Column: Details */}
+                <div className="flex-1 p-6 md:p-8 space-y-6">
+                  
+                  {/* Guest Info */}
+                  <div className="grid grid-cols-2 gap-8">
+                    <div>
+                      <p className="text-xs text-slate-400 uppercase tracking-wider mb-1">Primary Guest</p>
+                      <p className="font-medium text-lg text-slate-900">{booking.guestName}</p>
+                      <p className="text-sm text-slate-500">{booking.guestEmail}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-slate-400 uppercase tracking-wider mb-1">Total Guests</p>
+                      <div className="flex items-center gap-2">
+                        <Users className="w-5 h-5 text-slate-400" />
+                        <span className="font-medium text-lg text-slate-900">{booking.guests} Adults</span>
                       </div>
-                      <p className="font-semibold text-lg">${service.price}</p>
                     </div>
-                  ))}
-                </div>
+                  </div>
 
-                {booking.bookingType === "service" && (
-                  <div className="grid grid-cols-2 gap-4 text-sm pt-2">
-                    <div className="flex items-start gap-2">
-                      <Calendar className="w-4 h-4 text-muted-foreground mt-0.5" />
+                  <Separator className="bg-slate-100" />
+
+                  {/* Dates / Timeline */}
+                  {isRoomBooking ? (
+                    <div className="flex items-center justify-between bg-slate-50 p-4 rounded-xl border border-slate-100">
+                      <div className="text-center">
+                        <p className="text-xs text-slate-500 uppercase mb-1">Check-in</p>
+                        <p className="text-lg font-display font-bold text-slate-900">
+                          {booking.checkIn.toLocaleDateString('en-US', { day: 'numeric', month: 'short' })}
+                        </p>
+                        <p className="text-sm text-slate-400">3:00 PM</p>
+                      </div>
+                      
+                      <div className="flex-1 px-6 flex flex-col items-center">
+                        <div className="w-full h-[1px] bg-slate-300 relative">
+                          <div className="absolute top-1/2 left-0 -translate-y-1/2 w-2 h-2 rounded-full bg-slate-300" />
+                          <div className="absolute top-1/2 right-0 -translate-y-1/2 w-2 h-2 rounded-full bg-slate-300" />
+                        </div>
+                        <div className="mt-2 bg-white px-3 py-1 rounded-full border border-slate-200 text-xs font-medium text-slate-600 shadow-sm">
+                          {Math.ceil((booking.checkOut.getTime() - booking.checkIn.getTime()) / (1000 * 60 * 60 * 24))} Nights
+                        </div>
+                      </div>
+
+                      <div className="text-center">
+                        <p className="text-xs text-slate-500 uppercase mb-1">Check-out</p>
+                        <p className="text-lg font-display font-bold text-slate-900">
+                          {booking.checkOut.toLocaleDateString('en-US', { day: 'numeric', month: 'short' })}
+                        </p>
+                        <p className="text-sm text-slate-400">11:00 AM</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-4 bg-slate-50 p-6 rounded-xl border border-slate-100">
+                      <Calendar className="w-8 h-8 text-[#d4af37]" />
                       <div>
-                        <p className="text-muted-foreground">Service Date</p>
-                        <p className="font-semibold">{new Date(booking.checkIn).toLocaleDateString()}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {new Date(booking.checkIn).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                        <p className="text-sm text-slate-500">Service Date</p>
+                        <p className="text-lg font-medium text-slate-900">
+                          {booking.checkIn.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                        </p>
+                        <p className="text-sm text-slate-500">
+                          Time: {booking.checkIn.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </p>
                       </div>
                     </div>
-                    <div className="flex items-start gap-2">
-                      <Users className="w-4 h-4 text-muted-foreground mt-0.5" />
-                      <div>
-                        <p className="text-muted-foreground">Guests</p>
-                        <p className="font-semibold">{booking.guests}</p>
-                      </div>
+                  )}
+
+                  {/* Room / Services List */}
+                  <div>
+                    <h3 className="font-display text-lg font-medium mb-4 flex items-center gap-2">
+                      <Hotel className="w-4 h-4 text-[#d4af37]" /> Reservation Details
+                    </h3>
+                    <div className="space-y-4">
+                      {isRoomBooking && roomType && (
+                        <div className="flex justify-between items-start group">
+                          <div>
+                            <p className="font-medium text-slate-900">{roomType.name}</p>
+                            <p className="text-sm text-slate-500 line-clamp-1">{roomType.description}</p>
+                            {room && <Badge variant="outline" className="mt-2 border-[#d4af37]/30 text-[#d4af37] bg-[#d4af37]/5">Room {room.roomNumber}</Badge>}
+                          </div>
+                          <p className="font-medium text-slate-900">{formatCurrency(roomType.basePrice)}</p>
+                        </div>
+                      )}
+                      
+                      {bookingServices.map((service) => (
+                        <div key={service.id} className="flex justify-between items-start">
+                          <div>
+                            <p className="font-medium text-slate-900 flex items-center gap-2">
+                              {service.name}
+                            </p>
+                            <p className="text-sm text-slate-500">{service.category}</p>
+                          </div>
+                          <p className="font-medium text-slate-900">{formatCurrency(service.price)}</p>
+                        </div>
+                      ))}
                     </div>
                   </div>
-                )}
-              </div>
-            )}
-
-            {/* Total Price */}
-            <div className="glass p-6 rounded-lg">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-muted-foreground">Total Amount</p>
-                  <p className="text-xs text-muted-foreground mt-1">Payment Status: {booking.paymentStatus}</p>
                 </div>
-                <p className="text-3xl font-bold text-primary">${booking.totalPrice}</p>
-              </div>
-            </div>
 
-            {/* Important Information */}
-            <div className="space-y-2 text-sm">
-              <div className="flex items-start gap-2">
-                <CheckCircle2 className="w-4 h-4 text-green-600 mt-0.5" />
-                <p className="text-muted-foreground">A confirmation email has been sent to your registered email address</p>
-              </div>
-              {isRoomBooking && (
-                <>
-                  <div className="flex items-start gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-green-600 mt-0.5" />
-                    <p className="text-muted-foreground">Check-in time is after 3:00 PM on your arrival date</p>
+                {/* Right Column: Sidebar (QR & Summary) */}
+                <div className="w-full md:w-64 bg-slate-50 border-l border-slate-100 p-6 flex flex-col justify-between">
+                  
+                  {/* QR Code Section */}
+                  <div className="text-center mb-8">
+                    <div className="bg-white p-3 rounded-xl shadow-sm border border-slate-200 inline-block mb-4">
+                      {/* Fake QR Code Visual */}
+                      <QrCode className="w-24 h-24 text-slate-900 opacity-90" />
+                    </div>
+                    <p className="text-xs font-medium text-slate-900 uppercase tracking-wide">Express Check-in</p>
+                    <p className="text-[10px] text-slate-500 mt-1">Scan this code at the reception kiosk</p>
                   </div>
-                  <div className="flex items-start gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-green-600 mt-0.5" />
-                    <p className="text-muted-foreground">Check-out time is before 11:00 AM on your departure date</p>
-                  </div>
-                </>
-              )}
-              <div className="flex items-start gap-2">
-                <CheckCircle2 className="w-4 h-4 text-green-600 mt-0.5" />
-                <p className="text-muted-foreground">Free cancellation up to 24 hours before your booking</p>
-              </div>
-            </div>
 
-            {/* Action Buttons */}
-            <div className="grid gap-3 md:grid-cols-3 pt-4">
-              <Link href="/bookings" className="md:col-span-1">
-                <Button variant="default" className="w-full">
-                  <Calendar className="w-4 h-4 mr-2" />
-                  View My Bookings
+                  {/* Payment Summary */}
+                  <div className="space-y-4">
+                    <Separator className="bg-slate-200" />
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-slate-500">Subtotal</span>
+                        <span className="text-slate-900">{formatCurrency(booking.totalPrice * 0.9)}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-slate-500">Taxes & Fees</span>
+                        <span className="text-slate-900">{formatCurrency(booking.totalPrice * 0.1)}</span>
+                      </div>
+                    </div>
+                    <Separator className="bg-slate-200" />
+                    <div className="flex justify-between items-end">
+                      <div>
+                        <p className="text-xs text-slate-500 uppercase">Total Amount</p>
+                        <Badge className={`mt-1 ${booking.paymentStatus === 'paid' ? 'bg-green-100 text-green-700 hover:bg-green-100 border-none' : 'bg-amber-100 text-amber-700 hover:bg-amber-100 border-none'}`}>
+                          {booking.paymentStatus === 'paid' ? 'PAID' : 'PENDING'}
+                        </Badge>
+                      </div>
+                      <span className="text-xl font-display font-bold text-[#d4af37]">
+                        {formatCurrency(booking.totalPrice)}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Contact Help */}
+                  <div className="mt-6 pt-6 border-t border-slate-200 text-center space-y-2">
+                    <p className="text-xs text-slate-400 uppercase">Need Assistance?</p>
+                    <div className="flex justify-center gap-4">
+                      <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-white hover:text-[#d4af37]">
+                        <Phone className="w-4 h-4" />
+                      </Button>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-white hover:text-[#d4af37]">
+                        <Mail className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+              
+              {/* Footer Note */}
+              <div className="bg-[#1e293b] text-white p-3 text-center text-xs opacity-90">
+                <p>Please present this confirmation upon arrival. Cancellation is free up to 24 hours before check-in.</p>
+              </div>
+
+            </CardContent>
+          </Card>
+
+          {/* Bottom Action Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8 print:hidden">
+             <Link href="/rooms">
+                <Button className="w-full h-12 bg-white text-slate-900 border border-slate-200 hover:border-[#d4af37] hover:bg-slate-50 hover:text-[#d4af37] shadow-sm transition-all">
+                   <Hotel className="w-4 h-4 mr-2" /> Book Another Room
                 </Button>
-              </Link>
-              <Link href="/rooms" className="md:col-span-1">
-                <Button variant="outline" className="w-full">
-                  <Hotel className="w-4 h-4 mr-2" />
-                  Browse Rooms
+             </Link>
+             <Link href="/services">
+                <Button className="w-full h-12 bg-white text-slate-900 border border-slate-200 hover:border-[#d4af37] hover:bg-slate-50 hover:text-[#d4af37] shadow-sm transition-all">
+                   <Sparkles className="w-4 h-4 mr-2" /> Add Services
                 </Button>
-              </Link>
-              <Link href="/services" className="md:col-span-1">
-                <Button variant="outline" className="w-full">
-                  <Sparkles className="w-4 h-4 mr-2" />
-                  Browse Services
+             </Link>
+             <Link href="/contact">
+                <Button className="w-full h-12 bg-[#d4af37] hover:bg-[#c5a028] text-white shadow-md transition-all">
+                   Contact Concierge
                 </Button>
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
+             </Link>
+          </div>
+
+        </div>
       </main>
     </div>
   )
@@ -441,11 +462,7 @@ function BookingConfirmationContent() {
 
 export default function BookingConfirmationPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-      </div>
-    }>
+    <Suspense fallback={<Loading message="Retrieving itinerary..." size="lg" />}>
       <BookingConfirmationContent />
     </Suspense>
   )
