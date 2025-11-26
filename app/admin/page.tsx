@@ -152,28 +152,72 @@ export default function AdminPage() {
   // Authentication Check
   useEffect(() => {
     const checkAuth = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        router.push("/")
+      // Quick attempt to read current user
+      const { data }: { data: { user: SupabaseUser | null } } = await supabase.auth.getUser()
+      const u = (data as any)?.user ?? null
+
+      // If we have a user immediately, validate role
+      if (u) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", u.id)
+          .single()
+
+        if (profile?.role !== "admin") {
+          router.push("/")
+          return
+        }
+
+        setUser(u)
+        setIsAuthorized(true)
+        setAuthLoading(false)
         return
       }
-      
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", user.id)
-        .single()
 
-      if (profile?.role !== "admin") {
-        router.push("/")
-        return
+      // No immediate user — wait briefly for auth state change (grace period)
+      let redirected = false
+      const timer = setTimeout(() => {
+        if (!redirected) {
+          router.push("/")
+        }
+      }, 800)
+
+      const { data: subData } = supabase.auth.onAuthStateChange(async (_event: string, session: any) => {
+        const sUser = session?.user ?? null
+        if (!sUser) return
+        redirected = true
+        clearTimeout(timer)
+
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", sUser.id)
+          .single()
+
+        if (profile?.role !== "admin") {
+          router.push("/")
+          return
+        }
+
+        setUser(sUser)
+        setIsAuthorized(true)
+        setAuthLoading(false)
+      })
+
+      const subscription = (subData as any)?.subscription ?? subData
+      // Cleanup handled by effect return below
+      return () => {
+        clearTimeout(timer)
+        subscription?.unsubscribe?.()
       }
-
-      setUser(user)
-      setIsAuthorized(true)
-      setAuthLoading(false)
     }
-    checkAuth()
+    // call checkAuth and allow it to return a cleanup function if necessary
+    const maybeCleanup = checkAuth()
+    return () => {
+      // If checkAuth returned a cleanup function (when no immediate user), call it
+      if (typeof (maybeCleanup as any) === 'function') (maybeCleanup as any)()
+    }
   }, [supabase, router])
 
   const handleSignOut = async () => {

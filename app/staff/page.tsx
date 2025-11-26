@@ -149,25 +149,60 @@ export default function StaffPage() {
   // Auth Check
   useEffect(() => {
     const checkAuth = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        router.push("/")
-        return
-      }
-      
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", user.id)
-        .single()
+      const { data }: { data: { user: SupabaseUser | null } } = await supabase.auth.getUser()
+      const u = (data as any)?.user ?? null
 
-      if (profile?.role !== "staff") {
-        router.push("/")
+      if (u) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", u.id)
+          .single()
+
+        if (profile?.role !== "staff") {
+          router.push("/")
+          return
+        }
+        setUser(u)
         return
       }
-      setUser(user)
+
+      // Grace period: wait briefly for auth state change before redirecting
+      let redirected = false
+      const timer = setTimeout(() => {
+        if (!redirected) router.push("/")
+      }, 800)
+
+      const { data: subData } = supabase.auth.onAuthStateChange(async (_event: string, session: any) => {
+        const sUser = session?.user ?? null
+        if (!sUser) return
+        redirected = true
+        clearTimeout(timer)
+
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", sUser.id)
+          .single()
+
+        if (profile?.role !== "staff") {
+          router.push("/")
+          return
+        }
+        setUser(sUser)
+      })
+
+      const subscription = (subData as any)?.subscription ?? subData
+      return () => {
+        clearTimeout(timer)
+        subscription?.unsubscribe?.()
+      }
     }
-    checkAuth()
+
+    const maybeCleanup = checkAuth()
+    return () => {
+      if (typeof (maybeCleanup as any) === 'function') (maybeCleanup as any)()
+    }
   }, [supabase, router])
 
   const { bookings, rooms, loading, stats } = useStaffData(user)
