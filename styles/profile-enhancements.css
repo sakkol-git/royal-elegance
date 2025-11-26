@@ -1,0 +1,41 @@
+/*
+  profile-enhancements.css
+  Minimal placeholder to satisfy import from app/globals.css during builds.
+  Add or expand profile-specific enhancements here as needed.
+*/
+
+/* Basic layout adjustments for profile pages */
+.profile-container {
+  display: block;
+  margin: 0 auto;
+  max-width: 1100px;
+  padding: 1rem;
+}
+
+.profile-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.profile-avatar {
+  width: 84px;
+  height: 84px;
+  border-radius: 9999px; /* circle */
+  object-fit: cover;
+}
+
+.profile-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+/* Tabs fallback spacing if not covered by Tailwind classes */
+.tabs-list {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* Keep this file intentionally small and safe for build; expand with utility rules as needed. */
