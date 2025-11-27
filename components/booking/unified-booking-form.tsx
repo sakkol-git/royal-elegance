@@ -275,13 +275,12 @@ export function UnifiedBookingForm({ user, roomType, room, services, onCancel }:
                       <Input
                         id="checkIn"
                         type="date"
-                        className="pl-10 h-12 bg-slate-50 border-slate-300 text-slate-900 focus:bg-white focus:border-primary focus:ring-primary/20 transition-all font-medium shadow-sm"
+                        className="pl-2.5 h-12 bg-slate-50 border-slate-300 text-slate-900 focus:bg-white focus:border-primary focus:ring-primary/20 transition-all font-medium shadow-sm"
                         value={checkIn}
                         onChange={(e) => setCheckIn(e.target.value)}
                         min={new Date().toISOString().split("T")[0]}
                         required
                       />
-                      <CalendarIcon className="absolute left-3 top-3.5 w-5 h-5 text-slate-500 pointer-events-none" />
                     </div>
                   </div>
                   <div className="space-y-2">
@@ -292,13 +291,12 @@ export function UnifiedBookingForm({ user, roomType, room, services, onCancel }:
                       <Input
                         id="checkOut"
                         type="date"
-                        className={`pl-10 h-12 bg-slate-50 text-slate-900 transition-all font-medium shadow-sm ${dateError ? 'border-red-300 focus:border-red-500' : 'border-slate-300 focus:bg-white focus:border-primary'}`}
+                        className={`pl-2.5 h-12 bg-slate-50 text-slate-900 transition-all font-medium shadow-sm ${dateError ? 'border-red-300 focus:border-red-500' : 'border-slate-300 focus:bg-white focus:border-primary'}`}
                         value={checkOut}
                         onChange={(e) => setCheckOut(e.target.value)}
                         min={checkIn || new Date().toISOString().split("T")[0]}
                         required
                       />
-                      <CalendarIcon className="absolute left-3 top-3.5 w-5 h-5 text-slate-500 pointer-events-none" />
                     </div>
                   </div>
                 </div>
