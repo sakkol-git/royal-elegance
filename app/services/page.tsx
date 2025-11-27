@@ -87,7 +87,8 @@ export default function ServicesPage() {
 
   const handleBookService = (service: Service) => {
     if (!user) {
-      router.push("/auth/login")
+      // Preserve intended destination so user can continue booking after login
+      router.push(`/auth/login?next=${encodeURIComponent(`/services/${service.id}/book`)}`)
       return
     }
     // Navigate to service booking page

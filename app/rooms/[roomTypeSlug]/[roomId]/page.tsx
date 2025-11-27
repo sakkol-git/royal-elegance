@@ -353,7 +353,8 @@ export default function RoomDetailPage() {
                     size="lg"
                     onClick={() => {
                       if (!user) {
-                        router.push("/login")
+                        // Preserve destination so user returns to this room's booking form after login
+                        router.push(`/auth/login?next=${encodeURIComponent(`/rooms/${roomTypeSlug}/${roomId}`)}`)
                       } else {
                         setShowBookingForm(!showBookingForm)
                       }

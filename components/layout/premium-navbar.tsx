@@ -120,10 +120,15 @@ export function PremiumNavbar() {
                   Sign Out
                 </button>
               </>
-            ) : (
+            ) : (<div className="flex flex-row gap-2">
               <Link href="/auth/login" className="hover:text-[#d4af37] transition-colors">
-                Sign In / Register
+                Sign In 
               </Link>
+              |
+              <Link href="/auth/signin" className="hover:text-[#d4af37] transition-colors">
+                Register
+              </Link>
+              </div>
             )}
           </div>
         </div>

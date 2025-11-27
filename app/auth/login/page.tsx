@@ -113,9 +113,10 @@ function LoginPageContent() {
 
           {/* Login Form Component */}
           <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100">
-            <LoginForm 
-              onForgotPassword={() => router.push("/auth/reset-password")} 
-              onSwitchToSignUp={() => router.push("/auth/signup")} 
+            <LoginForm
+              redirectTo={searchParams.get('next') || '/home'}
+              onForgotPassword={() => router.push("/auth/reset-password")}
+              onSwitchToSignUp={() => router.push(`/auth/signup?next=${encodeURIComponent(searchParams.get('next') || '/home')}`)}
             />
           </div>
 

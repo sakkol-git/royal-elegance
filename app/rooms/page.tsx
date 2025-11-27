@@ -143,7 +143,8 @@ export default function RoomsPage() {
 
   const handleBookRoomType = async (roomType: RoomType) => {
     if (!user) {
-      router.push("/login")
+      // Preserve intended destination so user can continue booking after login
+      router.push(`/auth/login?next=${encodeURIComponent(`/rooms/${roomType.slug}`)}`)
       return
     }
 

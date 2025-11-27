@@ -30,9 +30,9 @@ export default function ServiceBookingPage() {
       setUser(u)
       setLoading(false)
       
-      // Redirect if not authenticated
+      // Redirect if not authenticated (preserve destination)
       if (!u) {
-        router.push("/login")
+        router.push(`/auth/login?next=${encodeURIComponent(`/services/${serviceId}/book`)}`)
       }
     })
 
@@ -40,7 +40,7 @@ export default function ServiceBookingPage() {
     const { data } = supabase.auth.onAuthStateChange((_event: string, session: any) => {
       setUser(session?.user ?? null)
       if (!session?.user) {
-        router.push("/login")
+        router.push(`/auth/login?next=${encodeURIComponent(`/services/${serviceId}/book`)}`)
       }
     })
 

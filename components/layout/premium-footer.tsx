@@ -31,7 +31,7 @@ export function PremiumFooter() {
   }, [supabase])
 
   return (
-  <footer className="bg-slate-800 text-slate-200">
+  <footer className="bg-slate-800 text-slate-200 bottom-0">
       <div className="hidden lg:block border-b border-white/5 py-6">
         <div className="container mx-auto px-4 flex justify-between items-start gap-8">
           <div className="max-w-lg">

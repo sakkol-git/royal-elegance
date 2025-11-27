@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useEffect } from "react"
@@ -28,23 +29,19 @@ import {
   Calendar, 
   Hotel, 
   Sparkles, 
-  CreditCard, 
-  Users, 
-  Clock, 
-  MapPin, 
-  ChevronDown, 
-  ChevronUp, 
-  Ban,
   CheckCircle2,
   AlertCircle,
   QrCode,
-  Phone
+  Phone,
+  Clock,
+  ChevronUp,
+  ChevronDown,
+  MapPin
 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
-import { format } from "date-fns" // Assuming you might have date-fns, otherwise standard JS dates used below
 import Loading from "@/components/ui/loading"
 
-// Helper: format currency consistently across booking views
+// Helper: format currency consistently
 const formatCurrency = (amount: number) => {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
@@ -52,7 +49,7 @@ const formatCurrency = (amount: number) => {
   }).format(amount)
 }
 
-// --- Utility Components for cleaner code ---
+// --- Utility Components ---
 
 const StatusBadge = ({ status }: { status: string }) => {
   const styles = {
@@ -121,13 +118,11 @@ export default function BookingsPage() {
     })
   }
 
-  // --- Data Fetching Logic (Kept mostly identical to ensure functionality) ---
-  
   useEffect(() => {
     const getUser = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
-        router.push("/login")
+        router.push("/auth/login")
         return
       }
       setUser(user)
@@ -135,20 +130,8 @@ export default function BookingsPage() {
     }
     getUser()
 
-    interface AuthSubscription {
-      unsubscribe: () => void
-    }
-
-    interface AuthSession {
-      user: SupabaseUser | null
-    }
-
-    interface AuthSubscriptionData {
-      subscription: AuthSubscription
-    }
-
     const { data } = supabase.auth.onAuthStateChange(
-      (_event: string, session: AuthSession | null) => {
+      (_event: string, session: any) => {
         setUser(session?.user ?? null)
         if (!session?.user) router.push("/auth/login")
       }
@@ -170,22 +153,12 @@ export default function BookingsPage() {
 
       if (bookingsError) throw bookingsError
 
-      // Map DB rows to Booking objects and collect booking IDs so we can
-      // fetch associated booking_services rows in a single query.
       const bookingRows: any[] = userBookingsData.map((booking: any) => ({
-        raw: booking,
         id: booking.id,
-        createdAt: new Date(booking.created_at),
-        updatedAt: booking.updated_at ? new Date(booking.updated_at) : undefined,
-        checkInDate: new Date(booking.check_in_date),
-        checkOutDate: new Date(booking.check_out_date),
-        checkIn: new Date(booking.check_in_date),
-        checkOut: new Date(booking.check_out_date),
       }))
 
-  const bookingIds = bookingRows.map((b: any) => b.id)
+      const bookingIds = bookingRows.map((b: any) => b.id)
 
-      // Fetch booking_services for all bookings in one call to avoid N+1.
       let bookingServicesMap: Record<string, string[]> = {}
       if (bookingIds.length > 0) {
         const { data: bsData, error: bsError } = await supabase
@@ -205,25 +178,13 @@ export default function BookingsPage() {
         ...booking,
         id: booking.id,
         createdAt: new Date(booking.created_at),
-        updatedAt: booking.updated_at ? new Date(booking.updated_at) : undefined,
-        checkInDate: new Date(booking.check_in_date),
-        checkOutDate: new Date(booking.check_out_date),
         checkIn: new Date(booking.check_in_date),
         checkOut: new Date(booking.check_out_date),
+        checkInDate: new Date(booking.check_in_date), // Keep for type compatibility
+        checkOutDate: new Date(booking.check_out_date),
         floorId: booking.floor_id,
         roomTypeId: booking.room_type_id,
         roomId: booking.room_id,
-        userId: booking.user_id,
-        guestName: booking.guest_name,
-        guestEmail: booking.guest_email,
-        guestPhone: booking.guest_phone,
-        guestCount: booking.guest_count,
-        guests: booking.guest_count,
-        bookingReference: booking.booking_reference,
-        paymentMethod: booking.payment_method,
-        paidAmount: booking.paid_amount,
-        paymentStatus: booking.payment_status,
-        // Determine booking type and populate services from the booking_services join
         services: bookingServicesMap[booking.id] || [],
         bookingType: booking.room_id && (bookingServicesMap[booking.id] || []).length > 0 ? 'both' : (booking.room_id ? 'room' : 'service'),
         totalPrice: booking.total_price,
@@ -264,7 +225,7 @@ export default function BookingsPage() {
         .subscribe()
       return () => { channel.unsubscribe() }
     }
-  }, [user, supabase]) // Removed 'fetchBookings' from dep array to avoid loops, called inside effect
+  }, [user, supabase])
 
   const handleCancelBooking = async (bookingId: string) => {
     try {
@@ -283,8 +244,6 @@ export default function BookingsPage() {
     }
   }
 
-  // --- Data Helpers ---
-
   const getRoomTypeForBooking = (booking: Booking) => {
     if (!booking.roomId) return null
     const room = rooms.find((r) => r.id === booking.roomId)
@@ -296,8 +255,6 @@ export default function BookingsPage() {
     return services.filter((s) => booking.services.includes(s.id))
   }
 
-  // --- Filter Logic ---
-
   const upcomingBookings = bookings.filter(b => b.status !== "cancelled" && new Date(b.checkOut).setHours(0,0,0,0) >= new Date().setHours(0,0,0,0))
   const pastBookings = bookings.filter(b => b.status !== "cancelled" && new Date(b.checkOut).setHours(0,0,0,0) < new Date().setHours(0,0,0,0))
   const cancelledBookings = bookings.filter(b => b.status === "cancelled")
@@ -307,10 +264,13 @@ export default function BookingsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-background pb-20">
+    // FIX: Main container is now a Flex Column with min-h-screen
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-background via-accent/5 to-background">
       <PremiumNavbar />
       
-      <main className="container max-w-5xl mx-auto px-4 sm:px-6 pt-32 space-y-8">
+      {/* FIX: Main has flex-1 to push footer down */}
+      <main className="flex-1 container max-w-5xl mx-auto px-4 sm:px-6 pt-32 pb-16 space-y-8">
+        
         {/* Header Section */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-gray-200 pb-6">
           <div className="space-y-1">
@@ -412,12 +372,14 @@ export default function BookingsPage() {
           </div>
         </Tabs>
       </main>
-      <PremiumFooter />
+      
+      {/* FIX: Footer inside the flex container */}
+      <PremiumFooter/>
     </div>
   )
 }
 
-// --- Sub-Components (Clean UI Design) ---
+// --- Sub-Components ---
 
 function EmptyState({ icon: Icon, title, description, actionLabel, onAction }: any) {
   return (
@@ -451,7 +413,7 @@ interface BookingCardProps {
 function BookingCard({ booking, roomType, bookingServices, isExpanded, onToggle, onCancel, type }: BookingCardProps) {
   const checkIn = new Date(booking.checkIn)
   const checkOut = new Date(booking.checkOut)
-  const nights = Math.ceil((checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24))
+  const nights = Math.max(1, Math.ceil((checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24)))
   const mainTitle = roomType ? roomType.name : bookingServices[0]?.name || "Service Booking"
   const isCancelled = type === "cancelled"
 
@@ -463,16 +425,10 @@ function BookingCard({ booking, roomType, bookingServices, isExpanded, onToggle,
         ${isCancelled ? 'opacity-75 bg-slate-50' : 'bg-white'}
       `}
     >
-      {/* Main Row (Visible always) */}
       <div className="p-5 cursor-pointer" onClick={onToggle}>
         <div className="flex flex-col md:flex-row gap-6 md:items-center justify-between">
-          
-          {/* Left: Icon & Primary Info */}
           <div className="flex items-start gap-4 flex-1">
-            <div className={`
-              p-3 rounded-xl flex-shrink-0
-              ${isCancelled ? 'bg-red-50 text-red-500' : 'bg-indigo-50 text-indigo-600'}
-            `}>
+            <div className={`p-3 rounded-xl flex-shrink-0 ${isCancelled ? 'bg-red-50 text-red-500' : 'bg-indigo-50 text-indigo-600'}`}>
               {booking.bookingType === 'room' ? <Hotel className="w-6 h-6" /> : <Sparkles className="w-6 h-6" />}
             </div>
             
@@ -494,7 +450,6 @@ function BookingCard({ booking, roomType, bookingServices, isExpanded, onToggle,
             </div>
           </div>
 
-          {/* Right: Price & Toggle */}
           <div className="flex items-center justify-between md:justify-end gap-6 min-w-[200px]">
             <div className="text-right">
               <p className="text-sm text-slate-500">Total Price</p>
@@ -510,15 +465,11 @@ function BookingCard({ booking, roomType, bookingServices, isExpanded, onToggle,
         </div>
       </div>
 
-      {/* Expanded Details */}
       {isExpanded && (
         <div className="border-t border-gray-100 bg-gray-50/50 animate-in slide-in-from-top-2 duration-200">
-          {/* Gold accent stripe to mirror confirmation card */}
           <div className="h-1 bg-gradient-to-r from-[#d4af37] via-[#f4d03f] to-[#d4af37]" />
 
           <div className="p-4 md:p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-
-            {/* Left Column: Details (compact, confirmation-like) */}
             <div className="space-y-4">
               <div>
                 <div className="flex items-center gap-2 text-[#d4af37] mb-2">
@@ -565,9 +516,7 @@ function BookingCard({ booking, roomType, bookingServices, isExpanded, onToggle,
               )}
             </div>
 
-            {/* Right Column: Compact Summary & Guest Info (responsive: col on mobile, row on md+) */}
             <div className="w-full md:w-64 bg-slate-50 border-l border-slate-100 p-4 flex flex-col md:flex-row justify-between items-stretch gap-4">
-              {/* QR + Express info */}
               <div className="flex items-center md:flex-col md:items-center gap-3">
                 <div className="bg-white p-2 rounded-lg shadow-sm border border-slate-200">
                   <QrCode className="w-14 h-14 text-slate-900" />
@@ -578,7 +527,6 @@ function BookingCard({ booking, roomType, bookingServices, isExpanded, onToggle,
                 </div>
               </div>
 
-              {/* Summary: Subtotal / Taxes and Total */}
               <div className="flex-1 flex flex-col justify-between gap-3">
                 <div className="bg-white rounded-lg border border-slate-200 p-3 shadow-sm">
                   <div className="flex justify-between text-sm">
@@ -602,7 +550,6 @@ function BookingCard({ booking, roomType, bookingServices, isExpanded, onToggle,
                 </div>
               </div>
 
-              {/* Assistance: on md screens show as right column with left border, on mobile appears below */}
               <div className="mt-2 md:mt-0 md:pl-4 md:border-l md:border-slate-200 flex flex-col items-center md:items-end justify-start">
                 <p className="text-xs text-slate-400 uppercase mb-2">Need Assistance?</p>
                 <div className="flex gap-3">
@@ -613,7 +560,6 @@ function BookingCard({ booking, roomType, bookingServices, isExpanded, onToggle,
             </div>
           </div>
 
-          {/* Action Footer (compact) */}
           <div className="bg-white px-4 py-3 border-t border-gray-200 flex flex-col sm:flex-row gap-3 justify-end items-center">
             <Button variant="outline" className="w-full sm:w-auto text-slate-600 border-slate-200">
               <MapPin className="w-4 h-4 mr-2" /> Get Directions
@@ -647,7 +593,6 @@ function BookingCard({ booking, roomType, bookingServices, isExpanded, onToggle,
   )
 }
 
-// Simple date formatter fallback
 function formatDate(date: Date, includeYear = false) {
   return date.toLocaleDateString("en-US", {
     month: "short",
