@@ -125,7 +125,7 @@ export function PremiumNavbar() {
                 Sign In 
               </Link>
               |
-              <Link href="/auth/signin" className="hover:text-[#d4af37] transition-colors">
+              <Link href="/auth/signup" className="hover:text-[#d4af37] transition-colors">
                 Register
               </Link>
               </div>
