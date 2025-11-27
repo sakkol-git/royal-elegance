@@ -43,12 +43,14 @@ export function PremiumHeroSection() {
         =============================================
         1. HERO SECTION
         =============================================
+        BEST PRACTICE: On ultrawide, use h-screen to fill viewport, 
+        but constrain content width so users don't have to turn their heads.
       */}
-  <section ref={targetRef} className="relative h-[80vh] min-h-[520px] w-full flex items-center justify-center overflow-hidden bg-black">
+      <section ref={targetRef} className="relative h-screen min-h-[600px] w-full flex items-center justify-center overflow-hidden bg-black">
         
-        {/* VIDEO BACKGROUND LAYER */}
+        {/* VIDEO BACKGROUND LAYER (Full Width) */}
         <motion.div style={{ y: yBg }} className="absolute inset-0 z-0">
-          <div className="absolute inset-0 bg-black/30 z-10" /> 
+          <div className="absolute inset-0 bg-black/40 z-10" /> 
           <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-transparent to-slate-950/30 z-10" />
 
           <video
@@ -63,47 +65,47 @@ export function PremiumHeroSection() {
           </video>
         </motion.div>
 
-        {/* HERO CONTENT */}
+        {/* HERO CONTENT (Constrained) */}
         <motion.div 
           style={{ opacity: opacityHero }}
           variants={staggerContainer}
           initial="hidden"
           animate="visible"
-          // ADDED: max-w constraints and 2xl scaling
-          className="relative z-20 container mx-auto px-6 text-center pt-12 max-w-[1400px]"
+          // UPDATE: Added max-w-[1600px] to keep content focused on huge screens
+          className="relative z-20 container mx-auto px-6 text-center pt-12 max-w-[1600px]"
         >
           {/* Badge */}
-          <motion.div variants={fadeInUp} className="inline-flex items-center gap-2 px-4 py-1 rounded-full border border-[#d4af37]/30 bg-black/40 backdrop-blur-md mb-4 ring-1 ring-[#d4af37]/20">
-            <Star className="w-3 h-3 text-[#d4af37] fill-[#d4af37]" />
-            <span className="text-[9px] md:text-[10px] text-[#d4af37] tracking-[0.2em] uppercase font-light">
+          <motion.div variants={fadeInUp} className="inline-flex items-center gap-2 px-6 py-2 rounded-full border border-[#d4af37]/30 bg-black/40 backdrop-blur-md mb-8 ring-1 ring-[#d4af37]/20">
+            <Star className="w-3 h-3 2xl:w-4 2xl:h-4 text-[#d4af37] fill-[#d4af37]" />
+            <span className="text-[10px] md:text-xs 2xl:text-sm text-[#d4af37] tracking-[0.25em] uppercase font-light">
               The Illustrate of Khmer Culture
             </span>
-            <Star className="w-3 h-3 text-[#d4af37] fill-[#d4af37]" />
+            <Star className="w-3 h-3 2xl:w-4 2xl:h-4 text-[#d4af37] fill-[#d4af37]" />
           </motion.div>
 
-          {/* Heading - ADDED: 2xl:text-[10rem] for ultrawide impact */}
-          <motion.h1 variants={fadeInUp} className="text-4xl md:text-6xl lg:text-8xl font-display font-light text-white mb-6 leading-[1.05] tracking-tight drop-shadow-2xl">
+          {/* Heading - Scaled for Ultrawide (2xl:text-9xl) */}
+          <motion.h1 variants={fadeInUp} className="text-5xl md:text-7xl lg:text-9xl 2xl:text-[10rem] font-display font-light text-white mb-8 leading-[1.05] tracking-tight drop-shadow-2xl">
             The Spirit of Luxury <br className="hidden md:block"/>
             <span className="text-transparent bg-gradient-to-r from-[#d4af37] via-[#f3e5b5] to-[#d4af37] bg-clip-text font-serif italic pr-4">
               Kingdom Of Cambodia
             </span>
           </motion.h1>
 
-          {/* Subheading - ADDED: max-w constraint to prevent line stretching */}
-          <motion.p variants={fadeInUp} className="max-w-2xl 2xl:max-w-4xl mx-auto text-base md:text-lg text-white/90 font-light leading-relaxed mb-6 text-balance drop-shadow-md">
+          {/* Subheading - Constrained Max Width for Readability */}
+          <motion.p variants={fadeInUp} className="max-w-2xl 2xl:max-w-4xl mx-auto text-lg md:text-xl 2xl:text-2xl text-white/90 font-light leading-relaxed mb-10 text-balance drop-shadow-md">
             Experience the warmth of Cambodian hospitality in a sanctuary designed for royalty. 
             An oasis of serenity in the heart of the Kingdom.
           </motion.p>
 
-          {/* Buttons */}
-          <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row gap-4 justify-center">
+          {/* Buttons - Larger click targets on large screens */}
+          <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row gap-6 justify-center">
             <Link href="/rooms">
-              <Button size="lg" className="w-full sm:w-auto min-w-[160px] 2xl:min-w-[200px] h-12 bg-white text-slate-900 hover:bg-[#d4af37] hover:text-white rounded-none tracking-widest text-xs uppercase font-medium transition-all duration-400 shadow-[0_0_30px_-8px_rgba(255,255,255,0.25)]">
+              <Button size="lg" className="w-full sm:w-auto min-w-[200px] 2xl:min-w-[240px] h-14 2xl:h-16 bg-white text-slate-900 hover:bg-[#d4af37] hover:text-white rounded-none tracking-widest text-xs 2xl:text-sm uppercase font-medium transition-all duration-500 shadow-[0_0_40px_-10px_rgba(255,255,255,0.3)]">
                 Reserve Suite
               </Button>
             </Link>
             <Link href="/dining">
-              <Button size="lg" variant="outline" className="w-full sm:w-auto min-w-[160px] 2xl:min-w-[200px] h-12 border-white/40 text-white hover:bg-white hover:text-slate-900 rounded-none tracking-widest text-xs uppercase font-medium transition-all duration-400 backdrop-blur-sm">
+              <Button size="lg" variant="outline" className="w-full sm:w-auto min-w-[200px] 2xl:min-w-[240px] h-14 2xl:h-16 border-white/40 text-white hover:bg-white hover:text-slate-900 rounded-none tracking-widest text-xs 2xl:text-sm uppercase font-medium transition-all duration-500 backdrop-blur-sm">
                 Explore The Hotel
               </Button>
             </Link>
@@ -115,10 +117,10 @@ export function PremiumHeroSection() {
            initial={{ opacity: 0 }} 
            animate={{ opacity: 1 }} 
            transition={{ delay: 2, duration: 1 }}
-           className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2"
+           className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2"
         >
-          <div className="w-[1px] h-12 bg-gradient-to-b from-transparent via-[#d4af37] to-transparent animate-pulse" />
-          <span className="text-[9px] uppercase tracking-widest text-[#d4af37]/80">Scroll</span>
+          <div className="w-[1px] h-16 bg-gradient-to-b from-transparent via-[#d4af37] to-transparent animate-pulse" />
+          <span className="text-[10px] uppercase tracking-widest text-[#d4af37]/80">Scroll</span>
         </motion.div>
       </section>
 
@@ -126,15 +128,17 @@ export function PremiumHeroSection() {
         =============================================
         2. FLOATING INFO BAR
         =============================================
+        BEST PRACTICE: Don't let 3 columns stretch 5000px wide. 
+        Limit container width to maintain visual grouping.
       */}
-  <div className="relative z-30 -mt-16 px-4 pb-16">
+      <div className="relative z-30 -mt-24 px-4 pb-20">
         <motion.div 
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-50px" }}
           transition={{ duration: 1, ease: luxuryEase }}
-          // ADDED: max-w-screen-xl to stop the bar from stretching 3000px wide
-          className="container mx-auto max-w-screen-xl 2xl:max-w-screen-2xl"
+          // UPDATE: max-w-screen-xl ensures these boxes stay reasonably sized
+          className="container mx-auto max-w-screen-xl 2xl:max-w-[1600px]"
         >
           <div className="bg-slate-800/95 backdrop-blur-xl border-t border-[#d4af37]/30 p-8 md:p-12 grid grid-cols-1 md:grid-cols-3 gap-8 shadow-2xl">
             <InfoItem icon={MapPin} title="Location" value="Siem Reap / Phnom Penh" />
@@ -149,7 +153,7 @@ export function PremiumHeroSection() {
         3. INTRO SECTION
         =============================================
       */}
-      <section className="py-20 md:py-32 bg-white relative">
+      <section className="py-20 md:py-32 2xl:py-40 bg-white relative">
         <div className="absolute inset-0 opacity-[0.03] bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none" />
         
         <motion.div 
@@ -157,11 +161,10 @@ export function PremiumHeroSection() {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-100px" }}
-          // ADDED: 2xl scaling
           className="container mx-auto px-6 max-w-4xl 2xl:max-w-6xl text-center relative z-10"
         >
           <motion.div variants={fadeInUp} className="flex justify-center mb-10">
-            <Sparkles className="w-10 h-10 2xl:w-14 2xl:h-14 text-[#d4af37]" />
+            <Sparkles className="w-10 h-10 2xl:w-16 2xl:h-16 text-[#d4af37]" />
           </motion.div>
           
           <motion.h2 variants={fadeInUp} className="text-4xl md:text-6xl 2xl:text-7xl font-display font-light text-slate-900 mb-10 leading-tight">
@@ -182,8 +185,8 @@ export function PremiumHeroSection() {
         =============================================
       */}
       <section className="py-20 2xl:py-32 bg-slate-50 border-t border-slate-200">
-        {/* ADDED: max-w-screen-2xl to prevent cards from becoming too wide/short on ultrawide */}
-        <div className="container mx-auto px-6 max-w-screen-2xl">
+        {/* UPDATE: Ensure content doesn't touch edges on ultrawide */}
+        <div className="container mx-auto px-6 max-w-[1800px]">
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -192,14 +195,15 @@ export function PremiumHeroSection() {
           >
             <div>
               <span className="text-[#d4af37] tracking-[0.2em] text-xs uppercase block mb-2">Accommodations</span>
-              <h3 className="text-4xl 2xl:text-5xl font-display text-slate-900">Your Private Sanctuary</h3>
+              <h3 className="text-4xl 2xl:text-6xl font-display text-slate-900">Your Private Sanctuary</h3>
             </div>
             <Link href="/rooms">
               <Button variant="link" className="text-slate-900 hover:text-[#d4af37] p-0 text-lg">View All Suites <ArrowRight className="ml-2 w-5 h-5" /></Button>
             </Link>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 2xl:gap-12">
+          {/* Grid gaps increased for large screens */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 2xl:gap-16">
             <RoomCard 
               title="Deluxe River View" 
               price="From $450" 
@@ -224,22 +228,22 @@ export function PremiumHeroSection() {
 
       {/* 
         =============================================
-        5. WELLNESS & SPA
+        5. WELLNESS & SPA (Parallax)
         =============================================
       */}
-      <section className="py-32 2xl:py-48 relative overflow-hidden flex items-center">
+      <section className="py-32 2xl:py-56 relative overflow-hidden flex items-center">
         <div className="absolute inset-0 bg-slate-900">
           <div className="absolute inset-0 opacity-40 bg-[url('https://images.unsplash.com/photo-1540555700478-4be289fbecef?q=80&w=3270&auto=format&fit=crop')] bg-cover bg-fixed bg-center" />
-          <div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-950/70 to-transparent" />
         </div>
 
-        <div className="container mx-auto px-6 relative z-10 max-w-screen-2xl">
+        <div className="container mx-auto px-6 relative z-10 max-w-[1800px]">
           <motion.div 
             variants={staggerContainer}
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
-            className="max-w-xl 2xl:max-w-2xl text-white"
+            className="max-w-xl 2xl:max-w-3xl text-white"
           >
             <motion.div variants={fadeInUp} className="flex items-center gap-3 mb-6 text-[#d4af37]">
               <Flower2 className="w-6 h-6" />
@@ -250,14 +254,14 @@ export function PremiumHeroSection() {
               Restore Your <br/> <span className="italic font-serif text-[#d4af37]">Inner Balance</span>
             </motion.h3>
             
-            <motion.p variants={fadeInUp} className="text-slate-300 text-lg 2xl:text-xl font-light leading-relaxed mb-10">
+            <motion.p variants={fadeInUp} className="text-slate-300 text-lg 2xl:text-2xl font-light leading-relaxed mb-10">
               Drawing inspiration from ancient Khmer healing rituals, our award-winning spa 
               offers a tranquil escape from the world. Indulge in treatments using organic 
               botanicals sourced from the sacred Kulen Mountains.
             </motion.p>
             
             <motion.div variants={fadeInUp}>
-              <Button className="h-14 px-10 bg-[#d4af37] text-white hover:bg-white hover:text-slate-900 rounded-none uppercase tracking-widest text-xs transition-all duration-300">
+              <Button className="h-14 2xl:h-16 px-10 2xl:px-12 bg-[#d4af37] text-white hover:bg-white hover:text-slate-900 rounded-none uppercase tracking-widest text-xs 2xl:text-sm transition-all duration-300">
                 Explore The Spa
               </Button>
             </motion.div>
@@ -270,8 +274,8 @@ export function PremiumHeroSection() {
         6. CAMBODIAN HERITAGE
         =============================================
       */}
-      <section className="py-24 2xl:py-32 bg-[#fcfbf9]">
-        <div className="container mx-auto px-6 max-w-screen-2xl">
+      <section className="py-24 2xl:py-40 bg-[#fcfbf9]">
+        <div className="container mx-auto px-6 max-w-[1800px]">
           <div className="flex flex-col md:flex-row gap-16 2xl:gap-32 items-center">
              {/* Content */}
              <motion.div 
@@ -282,10 +286,10 @@ export function PremiumHeroSection() {
               viewport={{ once: true }}
             >
               <span className="text-[#d4af37] tracking-[0.2em] text-xs uppercase block mb-4">Unforgettable Experiences</span>
-              <h3 className="text-4xl md:text-5xl 2xl:text-6xl font-display text-slate-900 mb-6 leading-tight">
+              <h3 className="text-4xl md:text-5xl 2xl:text-7xl font-display text-slate-900 mb-6 leading-tight">
                 Curated Journeys <br/> Through <span className="italic font-serif text-[#d4af37]">Time</span>
               </h3>
-              <p className="text-slate-600 leading-loose mb-8 font-light 2xl:text-lg">
+              <p className="text-slate-600 leading-loose mb-8 font-light 2xl:text-xl">
                 Let our dedicated concierge arrange private sunrise tours of Angkor Wat, 
                 exclusive helicopter flights over the Mekong, or authentic culinary classes 
                 with our master chefs. We unlock the secrets of Cambodia just for you.
@@ -338,7 +342,7 @@ export function PremiumHeroSection() {
         =============================================
       */}
       <section className="py-20 md:py-32 2xl:py-48 bg-slate-900 text-white overflow-hidden">
-        <div className="container mx-auto px-6 max-w-screen-2xl">
+        <div className="container mx-auto px-6 max-w-[1800px]">
           <div className="grid md:grid-cols-2 gap-16 2xl:gap-32 items-center">
             
             {/* Image Side */}
@@ -375,11 +379,11 @@ export function PremiumHeroSection() {
                 <span className="text-xs uppercase tracking-[0.2em]">Culinary Artistry</span>
               </motion.div>
               
-              <motion.h3 variants={fadeInUp} className="text-4xl md:text-6xl 2xl:text-7xl font-display font-light mb-8 leading-tight">
+              <motion.h3 variants={fadeInUp} className="text-4xl md:text-6xl 2xl:text-8xl font-display font-light mb-8 leading-tight">
                 Taste the <br/> <span className="italic font-serif text-[#d4af37]">Extraordinary</span>
               </motion.h3>
               
-              <motion.p variants={fadeInUp} className="text-slate-400 text-lg 2xl:text-xl font-light leading-relaxed mb-10 max-w-lg">
+              <motion.p variants={fadeInUp} className="text-slate-400 text-lg 2xl:text-2xl font-light leading-relaxed mb-10 max-w-lg 2xl:max-w-xl">
                 Experience the finest Khmer and French fusion cuisine. 
                 Our executive chefs craft menus that celebrate local heritage with global flair,
                 using ingredients sourced from our own organic gardens.
@@ -400,10 +404,10 @@ export function PremiumHeroSection() {
         8. TESTIMONIALS (Social Proof)
         =============================================
       */}
-      <section className="py-24 2xl:py-32 bg-white">
-        <div className="container mx-auto px-6 text-center max-w-screen-2xl">
+      <section className="py-24 2xl:py-40 bg-white">
+        <div className="container mx-auto px-6 text-center max-w-[1600px]">
           <Quote className="w-12 h-12 text-[#d4af37]/30 mx-auto mb-8" />
-          <h3 className="text-3xl 2xl:text-4xl font-display text-slate-900 mb-12">Guest Impressions</h3>
+          <h3 className="text-3xl 2xl:text-5xl font-display text-slate-900 mb-12">Guest Impressions</h3>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 2xl:gap-16">
             <TestimonialCard 
@@ -458,9 +462,9 @@ export function PremiumHeroSection() {
 
           <motion.div variants={fadeInUp}>
             <Link href="/rooms" className="inline-block">
-              <Button size="lg" className="h-16 px-12 text-base bg-white text-slate-900 hover:bg-[#d4af37] hover:text-white transition-all duration-500 rounded-none shadow-[0_0_50px_-15px_rgba(255,255,255,0.3)]">
+              <Button size="lg" className="h-16 2xl:h-20 px-12 text-base 2xl:text-lg bg-white text-slate-900 hover:bg-[#d4af37] hover:text-white transition-all duration-500 rounded-none shadow-[0_0_50px_-15px_rgba(255,255,255,0.3)]">
                 <Calendar className="w-4 h-4 mr-3" />
-                <span className="tracking-[0.2em] uppercase text-xs font-bold">Book Your Stay</span>
+                <span className="tracking-[0.2em] uppercase text-xs 2xl:text-sm font-bold">Book Your Stay</span>
               </Button>
             </Link>
           </motion.div>
@@ -483,11 +487,11 @@ function InfoItem({ icon: Icon, title, value, delay = 0 }: { icon: any, title: s
       className="flex items-start gap-4 group"
     >
       <div className="p-3 border border-[#d4af37]/20 rounded-full group-hover:border-[#d4af37] group-hover:bg-[#d4af37]/10 transition-colors duration-500">
-        <Icon className="w-5 h-5 text-[#d4af37]" />
+        <Icon className="w-5 h-5 2xl:w-6 2xl:h-6 text-[#d4af37]" />
       </div>
       <div>
-        <h4 className="text-[10px] uppercase tracking-[0.2em] text-slate-400 mb-1">{title}</h4>
-        <p className="font-display text-lg 2xl:text-xl text-white font-light">{value}</p>
+        <h4 className="text-[10px] 2xl:text-xs uppercase tracking-[0.2em] text-slate-400 mb-1">{title}</h4>
+        <p className="font-display text-lg 2xl:text-2xl text-white font-light">{value}</p>
       </div>
     </motion.div>
   )
@@ -513,10 +517,10 @@ function RoomCard({ title, price, image, delay }: { title: string, price: string
       </div>
       <div className="flex justify-between items-start border-b border-slate-200 pb-4 group-hover:border-[#d4af37] transition-colors duration-500">
         <div>
-          <h4 className="text-xl 2xl:text-2xl font-display text-slate-900 mb-1 group-hover:text-[#d4af37] transition-colors duration-300">{title}</h4>
-          <p className="text-xs uppercase tracking-widest text-slate-500">City View • 45sqm</p>
+          <h4 className="text-xl 2xl:text-3xl font-display text-slate-900 mb-1 group-hover:text-[#d4af37] transition-colors duration-300">{title}</h4>
+          <p className="text-xs 2xl:text-sm uppercase tracking-widest text-slate-500">City View • 45sqm</p>
         </div>
-        <span className="font-serif italic text-lg 2xl:text-xl text-slate-900">{price}</span>
+        <span className="font-serif italic text-lg 2xl:text-2xl text-slate-900">{price}</span>
       </div>
     </motion.div>
   )
@@ -529,14 +533,14 @@ function TestimonialCard({ text, author, location, delay }: { text: string, auth
       whileInView={{ opacity: 1, scale: 1 }}
       viewport={{ once: true }}
       transition={{ delay, duration: 0.8, ease: "easeOut" }}
-      className="p-8 2xl:p-12 bg-slate-50 border border-slate-100 shadow-sm hover:shadow-lg transition-all duration-300"
+      className="p-8 2xl:p-16 bg-slate-50 border border-slate-100 shadow-sm hover:shadow-lg transition-all duration-300"
     >
       <div className="flex justify-center gap-1 text-[#d4af37] mb-6">
-        {[...Array(5)].map((_, i) => <Star key={i} size={14} fill="currentColor" />)}
+        {[...Array(5)].map((_, i) => <Star key={i} size={14} className="2xl:w-5 2xl:h-5" fill="currentColor" />)}
       </div>
-      <p className="text-slate-600 font-light italic mb-6 leading-relaxed 2xl:text-lg">"{text}"</p>
+      <p className="text-slate-600 font-light italic mb-6 leading-relaxed 2xl:text-xl 2xl:leading-loose">"{text}"</p>
       <div>
-        <h5 className="text-slate-900 font-display font-medium 2xl:text-xl">{author}</h5>
+        <h5 className="text-slate-900 font-display font-medium 2xl:text-2xl">{author}</h5>
         <span className="text-xs text-slate-400 uppercase tracking-widest">{location}</span>
       </div>
     </motion.div>
