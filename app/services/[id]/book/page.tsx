@@ -5,6 +5,7 @@ import { useRouter, useParams } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import type { User as SupabaseUser } from "@supabase/supabase-js"
 import { PremiumNavbar } from "@/components/layout/premium-navbar"
+import { PremiumFooter } from "@/components/layout/premium-footer"
 import { ServiceBookingForm } from "@/components/user/service-booking-form"
 import Loading from "@/components/ui/loading"
 import type { Service } from "@/lib/types"
@@ -91,6 +92,7 @@ export default function ServiceBookingPage() {
       <main className="container mx-auto px-4 py-8" style={{ marginTop: "112px" }}>
         <ServiceBookingForm service={service} onBack={() => router.push("/services")} />
       </main>
+      <PremiumFooter />
     </div>
   )
 }

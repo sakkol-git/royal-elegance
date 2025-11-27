@@ -31,11 +31,22 @@ export function PremiumFooter() {
   }, [supabase])
 
   return (
-    <footer className="bg-slate-950 text-slate-200">
+  <footer className="bg-slate-800 text-slate-200">
       <div className="hidden lg:block border-b border-white/5 py-6">
         <div className="container mx-auto px-4 flex justify-between items-start gap-8">
           <div className="max-w-lg">
-            <h3 className="text-white text-xl font-display font-semibold tracking-widest">ROYAL ELEGANCE</h3>
+            {/* Official logo — replace older plain-text header */}
+            <Link href={user ? "/home" : "/"} className="relative z-50 flex flex-col items-start group">
+              <span className={`text-white text-xl font-display font-semibold tracking-widest transition-colors duration-300`}>
+                ROYAL
+                <span className={`ml-1 bg-slate-800 px-2 transition-colors duration-300 text-[#d4af37]`}>
+                  ELEGANCE
+                </span>
+              </span>
+              <span className={`text-[9px] sm:text-[10px] tracking-[0.3em] uppercase transition-colors duration-300 text-white/60`}>
+                Luxury Hotel & Residences
+              </span>
+            </Link>
             <p className="text-sm text-slate-400 mt-2">Luxury Hotel & Spa — Experience exceptional stays and curated services. Located in the heart of the city.</p>
             <div className="flex items-center gap-4 mt-4 text-slate-300">
               <a href="https://maps.google.com/?q=Royal+Elegance+Hotel" target="_blank" rel="noreferrer" className="flex items-center gap-2 hover:text-[#d4af37]">
@@ -88,7 +99,10 @@ export function PremiumFooter() {
           <div className="flex items-center gap-3">
             <MapPin className="w-4 h-4 text-[#d4af37]" />
             <div className="text-sm">
-              <div className="text-white font-medium">ROYAL ELEGANCE</div>
+              <div className="text-white font-medium">
+                <span className="font-display tracking-widest text-sm">ROYAL</span>
+                <span className="ml-1 bg-slate-800 px-1 text-[#d4af37] ml-2">ELEGANCE</span>
+              </div>
               <div className="text-slate-400 text-xs">123 Luxury Avenue</div>
             </div>
           </div>

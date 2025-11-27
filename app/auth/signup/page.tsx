@@ -42,33 +42,24 @@ export default function SignUpPage() {
   ]
 
   return (
-    <main className="min-h-screen w-full flex bg-slate-50 dark:bg-slate-950">
+    <main className="min-h-screen w-full flex bg-gradient-to-br from-background via-accent/5 to-background">
       
       {/* LEFT SIDE: Visuals & Benefits (Hidden on Mobile) */}
       <div className="hidden lg:flex flex-1 relative bg-slate-900 text-white overflow-hidden">
         {/* Background Image with Overlay */}
         <div className="absolute inset-0">
           <Image 
-            src="/luxury-hotel-lobby.png" // Ensure this image exists in your public folder
+            src="https://images.pexels.com/photos/13593296/pexels-photo-13593296.jpeg?_gl=1*zvih3c*_ga*MTY4NjM2ODA2MC4xNzY0MjIyNjU0*_ga_8JE65Q40S6*czE3NjQyMjI2NTMkbzEkZzEkdDE3NjQyMjI3MjMkajU5JGwwJGgw" // Ensure this image exists in your public folder
             alt="Luxury Hotel Lobby"
             fill
             className="object-cover opacity-40"
             priority
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/80 to-slate-950/40" />
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-800 via-slate-800/80 to-slate-800/40" />
         </div>
 
         {/* Content Container */}
-        <div className="relative z-10 flex flex-col justify-between p-16 h-full w-full max-w-2xl mx-auto">
-          {/* Top: Brand */}
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-white/10 backdrop-blur-sm flex items-center justify-center border border-white/10">
-              <Hotel className="w-6 h-6 text-[#d4af37]" />
-            </div>
-            <span className="text-xl font-display font-bold tracking-widest text-white">
-              ROYAL<span className="text-[#d4af37]">ELEGANCE</span>
-            </span>
-          </div>
+        <div className="relative z-10 flex flex-col justify-center p-16 h-full w-full max-w-2xl mx-auto">
 
           {/* Middle: Value Proposition */}
           <div className="space-y-10">
@@ -122,27 +113,31 @@ export default function SignUpPage() {
       </div>
 
       {/* RIGHT SIDE: Sign Up Form */}
-      <div className="flex-1 flex flex-col items-center justify-center p-6 sm:p-12 lg:p-16 relative z-10 bg-white dark:bg-slate-950">
+  <div className="flex-1 flex flex-col items-center justify-center p-6 sm:p-12 lg:p-16 relative z-10">
         <motion.div 
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5 }}
           className="w-full max-w-[420px] space-y-8"
         >
-          {/* Mobile Logo */}
-          <div className="lg:hidden flex justify-center mb-6">
-            <Link href="/" className="flex items-center gap-2 group">
-              <div className="w-10 h-10 rounded-lg bg-slate-900 flex items-center justify-center shadow-lg">
-                <Hotel className="w-5 h-5 text-[#d4af37]" />
-              </div>
-              <span className="text-xl font-display font-bold text-slate-900">
-                ROYAL<span className="text-[#d4af37]">ELEGANCE</span>
+          {/* Mobile Logo (Official) */}
+          <div className="flex justify-center lg:justify-start">
+            {/* Logo links to home for unauthenticated pages to avoid referencing undefined `user` */}
+            <Link href="/" className="relative z-50 flex flex-col items-start group">
+              <span className={`text-xl sm:text-2xl font-display font-bold tracking-widest transition-colors duration-300 text-white`}>
+                ROYAL
+                <span className={`ml-1 bg-slate-800 px-2 transition-colors duration-300 text-[#d4af37]`}>
+                  ELEGANCE
+                </span>
+              </span>
+              <span className={`text-[9px] sm:text-[10px] tracking-[0.3em] uppercase transition-colors duration-300 text-white/60`}>
+                Luxury Hotel & Residences
               </span>
             </Link>
           </div>
 
           <div className="text-center lg:text-left space-y-2">
-            <h2 className="text-3xl font-bold tracking-tight text-slate-900">Create an account</h2>
+            <h2 className="text-3xl font-bold tracking-tight text-slate-900">Not Register Yet?</h2>
             <p className="text-slate-500">
               Enter your details below to create your account and start your journey.
             </p>
@@ -157,8 +152,8 @@ export default function SignUpPage() {
             </div>
           </div>
 
-          {/* The Form */}
-          <div className="bg-white p-0 lg:p-0">
+          {/* Form Card */}
+          <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100">
             <SignUpForm onSwitchToLogin={() => router.push("/auth/login")} />
           </div>
 

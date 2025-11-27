@@ -87,7 +87,7 @@ export function PremiumNavbar() {
         Hidden on mobile, visible on lg screens and up for a cleaner mobile look.
         Used Slate-950 for deeper contrast.
       */}
-      <div className="hidden lg:block bg-slate-950 text-slate-300 py-2.5 px-4 text-[11px] uppercase tracking-wider font-medium border-b border-white/5 relative z-[60]">
+  <div className="hidden lg:block bg-slate-800 text-slate-300 py-2.5 px-4 text-[11px] uppercase tracking-wider font-medium border-b border-white/5 relative z-[60]">
         <div className="container mx-auto flex justify-between items-center">
           <div className="flex gap-8">
             <a href="https://maps.google.com/?q=Royal+Elegance+Hotel" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-[#d4af37] transition-colors duration-300">
@@ -146,16 +146,14 @@ export function PremiumNavbar() {
             
             {/* Logo Section */}
             <Link href={user ? "/home" : "/"} className="relative z-50 flex flex-col items-start group">
-              <span className={`text-xl sm:text-2xl font-display font-bold tracking-widest transition-colors duration-300 ${
-                scrolled ? "text-white" : "text-white"
+              <span className={`text-xl sm:text-2xl font-display font-bold tracking-widest transition-colors duration-300 text-white
               }`}>
                 ROYAL
-                <span className={`ml-1 transition-colors duration-300 ${scrolled ? 'text-[#d4af37]' : 'text-black'}`}>
+                <span className={`ml-1 bg-slate-800 px-2 transition-colors duration-300 text-[#d4af37]`}>
                   ELEGANCE
                 </span>
               </span>
-              <span className={`text-[9px] sm:text-[10px] tracking-[0.3em] uppercase transition-colors duration-300 ${
-                scrolled ? "text-white/60" : "text-white/80"
+              <span className={`text-[9px] sm:text-[10px] tracking-[0.3em] uppercase transition-colors duration-300 text-white/60
               }`}>
                 Luxury Hotel & Residences
               </span>
@@ -188,7 +186,7 @@ export function PremiumNavbar() {
                 <Link href="/rooms">
                   <Button
                     size="sm"
-                    className="bg-[#d4af37] text-black hover:bg-white hover:text-black border border-transparent hover:border-white/20 transition-all duration-300 font-medium tracking-wide px-6"
+                    className="bg-[#d4af37] text-black hover:bg-white hover:text-black border border-radius-0 border-transparent hover:border-white/20 transition-all duration-300 font-medium tracking-wide px-6"
                   >
                     <Calendar className="w-4 h-4 mr-2" />
                     Book Now
@@ -222,7 +220,7 @@ export function PremiumNavbar() {
         Full screen takeover with premium dark styling.
       */}
       <div
-        className={`fixed inset-0 z-40 lg:hidden bg-slate-950/95 backdrop-blur-xl transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] ${
+        className={`fixed inset-0 z-40 lg:hidden bg-slate-800/95 backdrop-blur-xl transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] ${
           mobileMenuOpen ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-full pointer-events-none"
         }`}
         onClick={() => setMobileMenuOpen(false)}

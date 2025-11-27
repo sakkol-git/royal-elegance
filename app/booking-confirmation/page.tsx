@@ -7,6 +7,7 @@ import type { User as SupabaseUser } from "@supabase/supabase-js"
 import { getBookings, getBookingsByUser, getRooms, getRoomTypes, getServices } from "@/lib/supabase-service"
 import type { Booking, Room, RoomType, Service } from "@/lib/types"
 import { PremiumNavbar } from "@/components/layout/premium-navbar"
+import { PremiumFooter } from "@/components/layout/premium-footer"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -222,6 +223,7 @@ function BookingConfirmationContent() {
              </CardContent>
            </Card>
         </main>
+          <PremiumFooter />
       </div>
     )
   }
@@ -475,6 +477,7 @@ function BookingConfirmationContent() {
 
         </div>
       </main>
+      <PremiumFooter />
     </div>
   )
 }

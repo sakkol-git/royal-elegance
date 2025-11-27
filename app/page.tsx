@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { PremiumNavbar } from "@/components/layout/premium-navbar"
+import { PremiumFooter } from "@/components/layout/premium-footer"
 import { PremiumHeroSection } from "@/components/landing/premium-hero-section"
 import SEO from "@/components/ui/SEO"
 import Loading from "@/components/ui/loading"
@@ -69,7 +70,7 @@ export default function LandingPage() {
         <div className="min-h-screen">
           <PremiumNavbar />
           <PremiumHeroSection />
-
+          <PremiumFooter/>
         </div>
       </>
   )

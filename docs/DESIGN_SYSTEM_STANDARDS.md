@@ -118,7 +118,7 @@ White opacity:  text-white/85, text-white/70, text-white/50
 
 ### Background Colors
 ```
-Dark sections:  bg-slate-950, bg-slate-900, bg-black
+Dark sections:  bg-slate-800, bg-slate-900, bg-black
 Light sections: bg-white, bg-slate-50
 Gradients:      from-slate-950 via-slate-900 to-slate-950
                 from-white via-slate-50 to-white

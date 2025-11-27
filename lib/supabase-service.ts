@@ -479,20 +479,28 @@ export const deleteService = async (id: string): Promise<void> => {
     .eq("id", id)
 
   if (error) {
-    // If the service is referenced by booking_services (FK constraint), prefer a safe soft-delete
-    // instead of failing. This keeps historical booking data intact while removing the service
-    // from active listings. Postgres FK violation code is 23503.
-    if ((error as any).code === '23503') {
-      console.warn(`[deleteService] FK constraint prevents delete for service ${id}. Marking as unavailable instead.`)
-      // Use updateService helper to mark the service unavailable (this will convert keys to snake_case)
+    // Detect FK/constraint errors robustly — Supabase may return the PG code in different fields
+    const errAny: any = error as any
+    const isFK =
+      errAny?.code === '23503' ||
+      (typeof errAny?.message === 'string' && errAny.message.toLowerCase().includes('foreign key')) ||
+      (typeof errAny?.details === 'string' && errAny.details.toLowerCase().includes('foreign key')) ||
+      (typeof errAny?.hint === 'string' && errAny.hint.toLowerCase().includes('foreign key')) ||
+      (typeof errAny?.message === 'string' && errAny.message.toLowerCase().includes('violates foreign key'))
+
+    if (isFK) {
+      console.warn(`[deleteService] FK constraint prevents delete for service ${id}. Attempting soft-delete (marking unavailable).`)
       try {
         await updateService(id, { available: false })
         return
       } catch (updateErr) {
         console.error('[deleteService] Failed to mark service unavailable after FK error:', updateErr)
+        // Throw the original DB error to surface the root cause
         throw error
       }
     }
+
+    // If it's not a FK error, rethrow so callers can handle it.
     throw error
   }
 }

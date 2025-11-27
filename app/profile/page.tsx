@@ -25,6 +25,7 @@ import { useToast } from "@/hooks/use-toast"
 
 // UI Components
 import { PremiumNavbar } from "@/components/layout/premium-navbar"
+import { PremiumFooter } from "@/components/layout/premium-footer"
 import { ProfileSettings } from "@/components/user/profile-settings"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
@@ -337,6 +338,7 @@ export default function ProfilePage() {
           </div>
         </div>
       </main>
+      <PremiumFooter />
     </div>
   )
 }

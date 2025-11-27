@@ -1,349 +1,555 @@
 "use client"
 
+import React, { useRef } from "react"
 import { Button } from "@/components/ui/button"
-import { ArrowRight, Calendar, Award, Sparkles, MapPin, Clock } from "lucide-react"
+import { ArrowRight, Calendar, Award, Sparkles, MapPin, Clock, Star, Utensils, Flower2, Palmtree, Quote } from "lucide-react"
 import Link from "next/link"
-import { useScrollAnimation } from "@/hooks/use-scroll-animation"
+import { motion, useScroll, useTransform, Variants } from "framer-motion"
+
+// --- LUXURY ANIMATION CONSTANTS ---
+// Explicitly type the cubic-bezier easing as a 4-tuple so TypeScript and
+// Framer Motion accept it as a valid `ease` value.
+const luxuryEase: [number, number, number, number] = [0.25, 0.4, 0.25, 1]
+
+// Hero media source: the MP4 placed in `public/`.
+// You added `public/Hero-Secion-Cinematic-Video.mp4` — reference it here.
+const VIDEO_SRC_MP4 = '/Hero-Secion-Cinematic-Video.mp4'
+
+const fadeInUp: Variants = {
+  hidden: { opacity: 0, y: 40 },
+  visible: { 
+    opacity: 1, 
+    y: 0,
+    transition: { duration: 1.2, ease: luxuryEase }
+  }
+}
+
+const staggerContainer: Variants = {
+  hidden: {},
+  visible: {
+    transition: { staggerChildren: 0.2, delayChildren: 0.1 }
+  }
+}
 
 export function PremiumHeroSection() {
-  const introSection = useScrollAnimation({ threshold: 0.1 })
-  const statsSection = useScrollAnimation({ threshold: 0.1 })
-  const roomsSection = useScrollAnimation({ threshold: 0.1 })
-  const diningSection = useScrollAnimation({ threshold: 0.15 })
-  const experiencesSection = useScrollAnimation({ threshold: 0.1 })
-  const finalCtaSection = useScrollAnimation({ threshold: 0.15 })
+  const targetRef = useRef(null)
+  const { scrollYProgress } = useScroll({
+    target: targetRef,
+    offset: ["start start", "end start"]
+  })
+  
+  // Parallax effects
+  const yBg = useTransform(scrollYProgress, [0, 1], ["0%", "20%"])
+  const opacityHero = useTransform(scrollYProgress, [0, 0.6], [1, 0])
 
   return (
-    <>
+    <div className="flex flex-col w-full bg-slate-50 overflow-hidden selection:bg-[#d4af37]/30">
+      
       {/* 
-        HERO SECTION 
-        Best Practice: Use `min-h-[100dvh]` instead of `h-screen` to handle 
-        mobile browser address bars correctly on iOS/Android.
+        =============================================
+        1. HERO SECTION (CINEMATIC VIDEO LOOP)
+        =============================================
       */}
-      <section className="relative min-h-[100dvh] flex items-center justify-center overflow-hidden supports-[min-height:100dvh]:min-h-[100dvh]">
-        {/* Background - Note: bg-fixed is often disabled on mobile OS for performance. 
-            Consider media queries to disable it on touch devices if scroll feels jittery. */}
-        <div className="absolute inset-0 z-0">
-          <div className="absolute inset-0 bg-[url('/luxury-hotel-lobby.png')] bg-cover bg-center bg-no-repeat bg-fixed" />
-          <div className="absolute inset-0 bg-gradient-to-br from-slate-950/80 via-slate-900/60 to-slate-950/90" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-        </div>
+      <section ref={targetRef} className="relative h-[100dvh] w-full flex items-center justify-center overflow-hidden bg-black">
+        
+        {/* VIDEO BACKGROUND LAYER */}
+        <motion.div style={{ y: yBg }} className="absolute inset-0 z-0">
+          <div className="absolute inset-0 bg-black/40 z-10" /> {/* Overlay for text readability */}
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-transparent to-slate-950/30 z-10" />
 
-        {/* Animated Pattern */}
-        <div className="absolute inset-0 opacity-[0.03] pointer-events-none">
-          <div className="absolute inset-0" style={{
-            backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
-            backgroundSize: '40px 40px'
-          }} />
-        </div>
+          {/*
+            Preferred: use an MP4 video hosted on your CDN. Set VIDEO_SRC_MP4 above.
+            Fallback: if no MP4 provided, render a full-bleed YouTube iframe configured
+            to autoplay muted and loop (uses playlist param to loop the same video).
+          */}
 
-        {/* Floating Accents - Hidden on small mobile to save GPU resources */}
-        <div className="hidden sm:block absolute top-20 left-10 w-96 h-96 bg-[#d4af37]/5 rounded-full blur-3xl animate-pulse" />
-        <div className="hidden sm:block absolute bottom-20 right-10 w-80 h-80 bg-[#d4af37]/3 rounded-full blur-3xl animate-pulse animation-delay-1000" />
+          {/* Native MP4 video from public/ — no iframe fallback. */}
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            poster="https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=3270&auto=format&fit=crop"
+            className="absolute inset-0 w-full h-full object-cover opacity-90"
+          >
+            <source src={VIDEO_SRC_MP4} type="video/mp4" />
 
-        {/* Content Container */}
-        <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center flex flex-col items-center justify-center h-full py-20">
-          
+          </video>
+        </motion.div>
+
+        {/* HERO CONTENT */}
+        <motion.div 
+          style={{ opacity: opacityHero }}
+          variants={staggerContainer}
+          initial="hidden"
+          animate="visible"
+          className="relative z-20 container mx-auto px-6 text-center pt-20"
+        >
           {/* Badge */}
-          <div className="inline-flex items-center gap-2 sm:gap-3 px-6 py-2 sm:px-8 sm:py-3 rounded-full glass mb-6 sm:mb-8 animate-fade-in-scale border border-white/20 backdrop-blur-md bg-white/5">
-            <div className="w-1.5 h-1.5 bg-[#d4af37] rounded-full animate-pulse" />
-            <Award className="w-3 h-3 sm:w-4 sm:h-4 text-[#d4af37]" />
-            <span className="text-[10px] sm:text-xs text-white tracking-[0.2em] uppercase font-light whitespace-nowrap">Est. 1929 • Heritage</span>
-            <div className="w-1.5 h-1.5 bg-[#d4af37] rounded-full animate-pulse" />
-          </div>
-
-          {/* 
-            Main Heading 
-            Best Practice: Fluid typography using breakpoints.
-            `text-balance` ensures the two lines are roughly equal width (prevents orphans).
-          */}
-          <h1 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-display font-light mb-6 sm:mb-8 text-white leading-[1.1] tracking-tight animate-fade-in-up drop-shadow-2xl text-balance">
-            YOUR HISTORIC SANCTUARY
-            <br />
-            <span className="font-semibold text-transparent bg-gradient-to-r from-white via-white to-[#d4af37] bg-clip-text">
-              OF TIMELESS ELEGANCE
+          <motion.div variants={fadeInUp} className="inline-flex items-center gap-2 px-6 py-2 rounded-full border border-[#d4af37]/30 bg-black/40 backdrop-blur-md mb-8 ring-1 ring-[#d4af37]/20">
+            <Star className="w-3 h-3 text-[#d4af37] fill-[#d4af37]" />
+            <span className="text-[10px] md:text-xs text-[#d4af37] tracking-[0.25em] uppercase font-light">
+              The Illustrate of Khmer Culture
             </span>
-          </h1>
+            <Star className="w-3 h-3 text-[#d4af37] fill-[#d4af37]" />
+          </motion.div>
 
-          {/* Description */}
-          <p className="text-base sm:text-lg md:text-xl text-white/85 mb-8 sm:mb-12 max-w-xl md:max-w-3xl mx-auto leading-relaxed animate-fade-in-up animation-delay-200 font-light drop-shadow-lg px-4">
-            Where centuries of heritage embrace contemporary refinement. 
-            Discover an unparalleled sanctuary of sophistication.
-          </p>
+          {/* Heading */}
+          <motion.h1 variants={fadeInUp} className="text-5xl md:text-7xl lg:text-9xl font-display font-light text-white mb-8 leading-[1.1] tracking-tight drop-shadow-2xl">
+            The Spirit of Luxury <br className="hidden md:block"/>
+            <span className="text-transparent bg-gradient-to-r from-[#d4af37] via-[#f3e5b5] to-[#d4af37] bg-clip-text font-serif italic pr-4">
+              Kingdom Of Cambodia
+            </span>
+          </motion.h1>
 
-          {/* Accent Line */}
-          <div className="flex items-center justify-center gap-4 mb-8 sm:mb-10 animate-fade-in-up animation-delay-300">
-            <div className="h-px w-8 sm:w-12 bg-gradient-to-r from-transparent to-[#d4af37]" />
-            <span className="text-[#d4af37] text-[10px] sm:text-xs tracking-[0.15em] uppercase">Experience Excellence</span>
-            <div className="h-px w-8 sm:w-12 bg-gradient-to-l from-transparent to-[#d4af37]" />
+          {/* Subheading */}
+          <motion.p variants={fadeInUp} className="max-w-2xl mx-auto text-lg md:text-xl text-white/90 font-light leading-relaxed mb-12 text-balance shadow-black drop-shadow-md">
+            Experience the warmth of Cambodian hospitality in a sanctuary designed for royalty. 
+            An oasis of serenity in the heart of the Kingdom.
+          </motion.p>
+
+          {/* Buttons */}
+          <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row gap-6 justify-center">
+            <Link href="/rooms">
+              <Button size="lg" className="w-full sm:w-auto min-w-[200px] h-14 bg-white text-slate-900 hover:bg-[#d4af37] hover:text-white rounded-none tracking-widest text-xs uppercase font-medium transition-all duration-500 shadow-[0_0_40px_-10px_rgba(255,255,255,0.3)]">
+                Reserve Suite
+              </Button>
+            </Link>
+            <Link href="/dining">
+              <Button size="lg" variant="outline" className="w-full sm:w-auto min-w-[200px] h-14 border-white/40 text-white hover:bg-white hover:text-slate-900 rounded-none tracking-widest text-xs uppercase font-medium transition-all duration-500 backdrop-blur-sm">
+                Explore The Hotel
+              </Button>
+            </Link>
+          </motion.div>
+        </motion.div>
+        
+        {/* Scroll Indicator */}
+        <motion.div 
+           initial={{ opacity: 0 }} 
+           animate={{ opacity: 1 }} 
+           transition={{ delay: 2, duration: 1 }}
+           className="absolute bottom-10 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2"
+        >
+          <div className="w-[1px] h-16 bg-gradient-to-b from-transparent via-[#d4af37] to-transparent animate-pulse" />
+          <span className="text-[10px] uppercase tracking-widest text-[#d4af37]/80">Scroll</span>
+        </motion.div>
+      </section>
+
+      {/* 
+        =============================================
+        2. FLOATING INFO BAR
+        =============================================
+      */}
+      <div className="relative z-30 -mt-24 px-4 pb-20">
+        <motion.div 
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-50px" }}
+          transition={{ duration: 1, ease: luxuryEase }}
+          className="container mx-auto"
+        >
+          <div className="bg-slate-800/95 backdrop-blur-xl border-t border-[#d4af37]/30 p-8 md:p-12 grid grid-cols-1 md:grid-cols-3 gap-8 shadow-2xl">
+            <InfoItem icon={MapPin} title="Location" value="Siem Reap / Phnom Penh" />
+            <InfoItem icon={Clock} title="Check-in" value="3:00 PM onwards" delay={0.1} />
+            <InfoItem icon={Award} title="Concierge" value="24/7 Private Butler" delay={0.2} />
           </div>
+        </motion.div>
+      </div>
 
-          {/* CTA Buttons 
-             Best Practice: `w-full sm:w-auto` allows buttons to stretch on phones 
-             but sit side-by-side on tablets/desktops.
-          */}
-          <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 w-full sm:w-auto justify-center items-center animate-fade-in-up animation-delay-400 px-4 sm:px-0">
-            <Link href="/rooms" className="w-full sm:w-auto">
-              <Button size="lg" className="w-full sm:w-auto group text-sm px-8 sm:px-10 py-6 sm:py-8 rounded-sm bg-white text-slate-900 hover:bg-[#d4af37] border-2 border-white hover:border-[#d4af37] transition-all duration-300 shadow-lg">
-                <Sparkles className="w-4 h-4 mr-2 group-hover:rotate-180 transition-transform duration-300" />
-                RESERVE YOUR STAY
-                <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </Button>
+      {/* 
+        =============================================
+        3. INTRO SECTION
+        =============================================
+      */}
+      <section className="py-20 md:py-32 bg-white relative">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 opacity-[0.03] bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none" />
+        
+        <motion.div 
+          variants={staggerContainer}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-100px" }}
+          className="container mx-auto px-6 max-w-4xl text-center relative z-10"
+        >
+          <motion.div variants={fadeInUp} className="flex justify-center mb-10">
+            <Sparkles className="w-10 h-10 text-[#d4af37]" />
+          </motion.div>
+          
+          <motion.h2 variants={fadeInUp} className="text-4xl md:text-6xl font-display font-light text-slate-900 mb-10 leading-tight">
+            A Legacy of <span className="text-[#d4af37] italic font-serif">Gracious Living</span>
+          </motion.h2>
+          
+          <motion.p variants={fadeInUp} className="text-lg md:text-2xl text-slate-600 font-light leading-loose text-balance">
+            Steeped in the rich traditions of Cambodia, our hotel offers a seamless blend of 
+            ancient aesthetics and modern sophistication. From the moment you arrive, 
+            you are not just a guest, but royalty returning home.
+          </motion.p>
+        </motion.div>
+      </section>
+
+      {/* 
+        =============================================
+        4. ROOMS SHOWCASE
+        =============================================
+      */}
+      <section className="py-20 bg-slate-50 border-t border-slate-200">
+        <div className="container mx-auto px-6">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="flex flex-col md:flex-row justify-between items-end mb-16 gap-4"
+          >
+            <div>
+              <span className="text-[#d4af37] tracking-[0.2em] text-xs uppercase block mb-2">Accommodations</span>
+              <h3 className="text-4xl font-display text-slate-900">Your Private Sanctuary</h3>
+            </div>
+            <Link href="/rooms">
+              <Button variant="link" className="text-slate-900 hover:text-[#d4af37] p-0">View All Suites <ArrowRight className="ml-2 w-4 h-4" /></Button>
             </Link>
-            <Link href="/services" className="w-full sm:w-auto">
-              <Button
-                size="lg"
-                className="w-full sm:w-auto group text-sm px-8 sm:px-10 py-6 sm:py-8 rounded-sm bg-transparent text-white border-2 border-white/60 hover:bg-white hover:text-slate-900 hover:border-[#d4af37] transition-all duration-300 shadow-lg"
-              >
-                <Award className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform duration-300" />
-                DISCOVER EXPERIENCES
-                <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
-              </Button>
-            </Link>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <RoomCard 
+              title="Deluxe River View" 
+              price="From $450" 
+              image="https://images.unsplash.com/photo-1590490360182-c33d57733427?q=80&w=2074&auto=format&fit=crop"
+              delay={0}
+            />
+            <RoomCard 
+              title="Royal Angkor Suite" 
+              price="From $850" 
+              image="https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=2670&auto=format&fit=crop"
+              delay={0.2}
+            />
+            <RoomCard 
+              title="The Emperor's Villa" 
+              price="From $2,500" 
+              image="https://images.unsplash.com/photo-1631049307264-da0ec9d70304?q=80&w=2670&auto=format&fit=crop"
+              delay={0.4}
+            />
           </div>
         </div>
       </section>
 
-      {/* Quick Info Bar - Stack on mobile, Grid on desktop */}
-      <section className="bg-gradient-to-r from-slate-900 via-slate-950 to-slate-900 text-white py-8 border-y border-[#d4af37]/20 backdrop-blur-sm">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 divide-y md:divide-y-0 divide-white/10">
-            <div className="flex items-center justify-center gap-4 group p-2 md:p-4 rounded-lg">
-              <div className="p-3 rounded-full bg-[#d4af37]/10 group-hover:bg-[#d4af37]/20 transition-colors shrink-0">
-                <MapPin className="w-5 h-5 sm:w-6 sm:h-6 text-[#d4af37]" />
-              </div>
-              <div className="text-left">
-                <div className="text-[10px] sm:text-xs uppercase tracking-widest text-slate-400 font-light">Location</div>
-                <div className="text-sm font-light">Downtown Historic District</div>
-              </div>
-            </div>
-            <div className="flex items-center justify-center gap-4 group p-2 md:p-4 pt-6 md:pt-4 rounded-lg">
-              <div className="p-3 rounded-full bg-[#d4af37]/10 group-hover:bg-[#d4af37]/20 transition-colors shrink-0">
-                <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-[#d4af37]" />
-              </div>
-              <div className="text-left">
-                <div className="text-[10px] sm:text-xs uppercase tracking-widest text-slate-400 font-light">Check-in / Out</div>
-                <div className="text-sm font-light">3:00 PM / 12:00 PM</div>
-              </div>
-            </div>
-            <div className="flex items-center justify-center gap-4 group p-2 md:p-4 pt-6 md:pt-4 rounded-lg">
-              <div className="p-3 rounded-full bg-[#d4af37]/10 group-hover:bg-[#d4af37]/20 transition-colors shrink-0">
-                <Calendar className="w-5 h-5 sm:w-6 sm:h-6 text-[#d4af37]" />
-              </div>
-              <div className="text-left">
-                <div className="text-[10px] sm:text-xs uppercase tracking-widest text-slate-400 font-light">Reservations</div>
-                <div className="text-sm font-light">+1 (234) 567-890</div>
-              </div>
-            </div>
-          </div>
+      {/* 
+        =============================================
+        5. NEW SECTION: WELLNESS & SPA (Parallax)
+        =============================================
+      */}
+      <section className="py-32 relative overflow-hidden flex items-center">
+        <div className="absolute inset-0 bg-slate-900">
+          <div className="absolute inset-0 opacity-40 bg-[url('https://images.unsplash.com/photo-1540555700478-4be289fbecef?q=80&w=3270&auto=format&fit=crop')] bg-cover bg-fixed bg-center" />
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 to-transparent" />
         </div>
-      </section>
 
-      {/* Intro Section - Responsive Padding */}
-      <section 
-        ref={introSection.ref}
-        className="py-16 md:py-24 lg:py-32 bg-gradient-to-b from-white via-slate-50 to-white relative overflow-hidden"
-      >
-        <div className="container mx-auto px-4 sm:px-6 relative z-10">
-          <div className="max-w-4xl mx-auto text-center">
-            <div className={`flex justify-center mb-8 sm:mb-10 ${introSection.isVisible ? 'scroll-fade-in' : ''}`}>
-              <div className="h-px w-16 bg-gradient-to-r from-transparent via-[#d4af37] to-transparent" />
-            </div>
-
-            <span className={`text-xs uppercase tracking-[0.2em] text-[#d4af37] font-light mb-4 sm:mb-6 block ${introSection.isVisible ? 'scroll-fade-in scroll-stagger-1' : ''}`}>Our Heritage</span>
+        <div className="container mx-auto px-6 relative z-10">
+          <motion.div 
+            variants={staggerContainer}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            className="max-w-xl text-white"
+          >
+            <motion.div variants={fadeInUp} className="flex items-center gap-3 mb-6 text-[#d4af37]">
+              <Flower2 className="w-6 h-6" />
+              <span className="text-xs uppercase tracking-[0.2em]">Holistic Wellness</span>
+            </motion.div>
             
-            <h2 className={`text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-display font-light mb-8 sm:mb-12 text-slate-900 leading-tight text-balance ${introSection.isVisible ? 'scroll-fade-in-up scroll-stagger-2' : ''}`}>
-              Where <span className="text-[#d4af37] font-semibold">Timeless Heritage</span> Meets <span className="font-semibold">Modern Luxury</span>
-            </h2>
+            <motion.h3 variants={fadeInUp} className="text-5xl md:text-7xl font-display font-light mb-8 leading-none">
+              Restore Your <br/> <span className="italic font-serif text-[#d4af37]">Inner Balance</span>
+            </motion.h3>
             
-            <div className="space-y-6 text-slate-600 font-light text-base sm:text-lg leading-relaxed">
-              <p className={`${introSection.isVisible ? 'scroll-fade-in-up scroll-stagger-3' : ''}`}>
-                Since 1929, our hotel has stood as an enduring beacon of refined elegance. 
-                Meticulously restored to honour colonial grandeur while embracing contemporary comfort.
-              </p>
-              <p className={`hidden sm:block ${introSection.isVisible ? 'scroll-fade-in-up scroll-stagger-4' : ''}`}>
-                Every detail—from our exquisitely appointed rooms to our award-winning culinary experiences—
-                is designed to create moments of sublime tranquility.
-              </p>
-            </div>
-
-            <div className={`flex justify-center mt-8 sm:mt-10 ${introSection.isVisible ? 'scroll-fade-in' : ''}`}>
-              <div className="h-px w-16 bg-gradient-to-r from-transparent via-[#d4af37] to-transparent" />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Stats Section - Responsive Grid */}
-      <section 
-        ref={statsSection.ref}
-        className="py-16 md:py-24 lg:py-32 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white relative overflow-hidden"
-      >
-        <div className="container mx-auto px-4 sm:px-6 relative z-10">
-          <div className="text-center mb-10 sm:mb-16">
-            <span className={`text-xs uppercase tracking-[0.2em] text-[#d4af37] font-light ${statsSection.isVisible ? 'scroll-fade-in' : ''}`}>Excellence by Numbers</span>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
-            {[
-              { value: "95", label: "Years", suffix: "+" },
-              { value: "175", label: "Rooms", suffix: "" },
-              { value: "4.9", label: "Rating", suffix: "/5" },
-              { value: "24/7", label: "Service", suffix: "" },
-            ].map((stat, index) => (
-              <div
-                key={index}
-                className={`text-center group relative ${statsSection.isVisible ? 'scroll-scale-up' : ''}`}
-                style={{ animationDelay: statsSection.isVisible ? `${index * 0.15}s` : undefined }}
-              >
-                <div className="py-4 md:py-8">
-                  <div className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-display font-light text-[#d4af37] mb-2 sm:mb-3 group-hover:scale-110 transition-transform duration-300">
-                    {stat.value}
-                    <span className="text-2xl sm:text-3xl md:text-4xl text-white/70 ml-1">{stat.suffix}</span>
-                  </div>
-                  <div className="text-[10px] sm:text-sm uppercase tracking-wider text-slate-400 font-light">
-                    {stat.label}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Rooms Section - Responsive Card Grid */}
-      <section 
-        ref={roomsSection.ref}
-        className="py-16 md:py-24 lg:py-32 bg-gradient-to-b from-white to-slate-50 relative overflow-hidden"
-      >
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12 sm:mb-16">
-            <span className={`text-xs uppercase tracking-[0.2em] text-[#d4af37] font-light mb-4 block ${roomsSection.isVisible ? 'scroll-fade-in' : ''}`}>Accommodations</span>
-            <h2 className={`text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-display font-light mb-6 text-slate-900 leading-tight ${roomsSection.isVisible ? 'scroll-fade-in-up scroll-stagger-1' : ''}`}>
-              Your Stay in <span className="font-semibold">Supreme Comfort</span>
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 lg:gap-10 mb-12">
-            {[
-              { name: "Deluxe Room", size: "35 sqm", guests: "2", image: "/room-deluxe.jpg" },
-              { name: "Executive Suite", size: "65 sqm", guests: "4", image: "/room-suite.jpg" },
-              { name: "Presidential Suite", size: "120 sqm", guests: "6", image: "/room-presidential.jpg" },
-            ].map((room, index) => (
-              <div
-                key={index}
-                className={`group glass-card overflow-hidden border border-white/50 hover:border-[#d4af37] transition-all duration-500 shadow-lg hover:shadow-2xl ${roomsSection.isVisible ? 'scroll-fade-in-up' : ''}`}
-                style={{ animationDelay: roomsSection.isVisible ? `${index * 0.15}s` : undefined }}
-              >
-                {/* 
-                   Best Practice: aspect-ratio on images prevents CLS (Content Layout Shift)
-                */}
-                <div className="relative aspect-[4/3] bg-slate-200 overflow-hidden">
-                   {/* Fallback color/placeholder needed for real production if image fails */}
-                  <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-slate-950/95 z-10" />
-                  
-                  {/* Info Overlay */}
-                  <div className="absolute inset-0 flex flex-col justify-end p-6 z-20">
-                    <h3 className="text-2xl sm:text-3xl font-display font-light text-white mb-2 group-hover:text-[#d4af37] transition-colors duration-300">
-                      {room.name}
-                    </h3>
-                    <div className="flex items-center gap-4 text-white/80 text-xs sm:text-sm font-light">
-                      <span className="flex items-center gap-1">
-                        <span className="w-1 h-1 bg-[#d4af37] rounded-full" />
-                        {room.guests} Guests
-                      </span>
-                      <span className="text-[#d4af37]">•</span>
-                      <span className="flex items-center gap-1">
-                        <span className="w-1 h-1 bg-[#d4af37] rounded-full" />
-                        {room.size}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-                <div className="p-6 bg-white/95 backdrop-blur-sm">
-                  <p className="text-slate-600 text-sm mb-6 line-clamp-3 font-light leading-relaxed">
-                    Exquisitely appointed with premium amenities, air-conditioning, elegant fixtures, and authentic colonial charm.
-                  </p>
-                  <Button variant="link" className="p-0 text-[#d4af37] hover:text-slate-900 group-hover:gap-3 transition-all font-light text-sm">
-                    Explore Details
-                    <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="text-center">
-            <Link href="/rooms" className="block sm:inline-block">
-              <Button size="lg" variant="outline" className="w-full sm:w-auto rounded-sm px-12 py-6 border-2 border-slate-900 text-slate-900 hover:bg-slate-900 hover:text-white hover:border-[#d4af37] transition-all duration-300">
-                VIEW ALL ROOMS & SUITES
-                <ArrowRight className="ml-2 w-4 h-4" />
+            <motion.p variants={fadeInUp} className="text-slate-300 text-lg font-light leading-relaxed mb-10">
+              Drawing inspiration from ancient Khmer healing rituals, our award-winning spa 
+              offers a tranquil escape from the world. Indulge in treatments using organic 
+              botanicals sourced from the sacred Kulen Mountains.
+            </motion.p>
+            
+            <motion.div variants={fadeInUp}>
+              <Button className="h-14 px-10 bg-[#d4af37] text-white hover:bg-white hover:text-slate-900 rounded-none uppercase tracking-widest text-xs transition-all duration-300">
+                Explore The Spa
               </Button>
-            </Link>
+            </motion.div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* 
+        =============================================
+        6. NEW SECTION: CAMBODIAN HERITAGE
+        =============================================
+      */}
+      <section className="py-24 bg-[#fcfbf9]">
+        <div className="container mx-auto px-6">
+          <div className="flex flex-col md:flex-row gap-16 items-center">
+             {/* Content */}
+             <motion.div 
+              className="flex-1"
+              initial={{ opacity: 0, x: -50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 1, ease: luxuryEase }}
+              viewport={{ once: true }}
+            >
+              <span className="text-[#d4af37] tracking-[0.2em] text-xs uppercase block mb-4">Unforgettable Experiences</span>
+              <h3 className="text-4xl md:text-5xl font-display text-slate-900 mb-6 leading-tight">
+                Curated Journeys <br/> Through <span className="italic font-serif text-[#d4af37]">Time</span>
+              </h3>
+              <p className="text-slate-600 leading-loose mb-8 font-light">
+                Let our dedicated concierge arrange private sunrise tours of Angkor Wat, 
+                exclusive helicopter flights over the Mekong, or authentic culinary classes 
+                with our master chefs. We unlock the secrets of Cambodia just for you.
+              </p>
+              
+              <ul className="space-y-4 mb-8">
+                {[
+                  "Private Sunrise Temple Tour", 
+                  "Mekong River Sunset Cruise", 
+                  "Traditional Apsara Dance Dinner"
+                ].map((item, i) => (
+                  <li key={i} className="flex items-center gap-3 text-slate-800 font-display">
+                    <div className="w-1.5 h-1.5 bg-[#d4af37] rounded-full" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+
+              <Button variant="outline" className="h-12 border-slate-300 hover:border-[#d4af37] hover:text-[#d4af37] text-slate-600 rounded-none uppercase tracking-widest text-xs">
+                View Experiences
+              </Button>
+            </motion.div>
+
+            {/* Images Grid */}
+            <motion.div 
+              className="flex-1 grid grid-cols-2 gap-4"
+              initial={{ opacity: 0, x: 50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 1, ease: luxuryEase }}
+              viewport={{ once: true }}
+            >
+              <div className="space-y-4 mt-8">
+                <div className="aspect-[3/4] bg-slate-200 w-full overflow-hidden">
+                   <img src="https://i.pinimg.com/1200x/33/42/b6/3342b65ef0e9be4e29e9ffa60b547207.jpg" alt="Angkor Wat" className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" />
+                </div>
+              </div>
+              <div className="space-y-4">
+                <div className="aspect-[3/4] bg-slate-200 w-full overflow-hidden">
+                   <img src="https://i.pinimg.com/736x/a0/49/f9/a049f9c499d325d6cac31dbed06448f0.jpg" alt="Khmer Culture" className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" />
+                </div>
+              </div>
+            </motion.div>
           </div>
         </div>
       </section>
 
-      {/* Dining Section - Stack on Mobile, Side-by-Side on Desktop */}
-      <section 
-        ref={diningSection.ref}
-        className="py-16 md:py-24 lg:py-32 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white relative overflow-hidden"
-      >
-        <div className="container mx-auto px-4 sm:px-6 relative z-10">
-          <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center">
-            <div className="text-center md:text-left">
-              <span className={`text-xs uppercase tracking-[0.2em] text-[#d4af37] font-light mb-4 block ${diningSection.isVisible ? 'scroll-fade-in' : ''}`}>Culinary Excellence</span>
-              <h2 className={`text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-display font-light mb-6 ${diningSection.isVisible ? 'scroll-fade-in-left' : ''}`}>
-                Royal Flavours <span className="font-semibold text-transparent bg-gradient-to-r from-[#d4af37] to-white bg-clip-text">Crafted with Heritage</span>
-              </h2>
-              <p className={`text-base text-slate-300 mb-8 leading-relaxed font-light ${diningSection.isVisible ? 'scroll-fade-in-up scroll-stagger-1' : ''}`}>
-                Experience elevated culinary artistry in our signature restaurants. From intimate fine dining to grand celebratory occasions.
-              </p>
-              <Link href="/services" className="block sm:inline-block">
-                <Button size="lg" className={`w-full sm:w-auto rounded-sm border-white text-white hover:bg-white hover:text-slate-900 hover:border-[#d4af37] transition-all duration-300 px-8 py-6 border-2 ${diningSection.isVisible ? 'scroll-fade-in-up scroll-stagger-2' : ''}`}>
-                  EXPLORE DINING EXPERIENCES
-                  <ArrowRight className="ml-2 w-4 h-4" />
+      {/* 
+        =============================================
+        7. DINING SECTION
+        =============================================
+      */}
+      <section className="py-20 md:py-32 bg-slate-900 text-white overflow-hidden">
+        <div className="container mx-auto px-6">
+          <div className="grid md:grid-cols-2 gap-16 items-center">
+            
+            {/* Image Side */}
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 1.5, ease: luxuryEase }}
+              className="relative aspect-[4/5] overflow-hidden"
+            >
+              <div 
+                className="absolute inset-0 bg-cover bg-center hover:scale-105 transition-transform duration-[2s]"
+                style={{ backgroundImage: "url('https://images.unsplash.com/photo-1559339352-11d035aa65de?q=80&w=2574&auto=format&fit=crop')" }}
+              />
+              <div className="absolute bottom-0 left-0 p-8 bg-gradient-to-t from-black/80 to-transparent w-full">
+                <div className="flex items-center gap-2 text-[#d4af37] mb-2">
+                  <Star className="w-4 h-4 fill-[#d4af37]" />
+                  <span className="text-xs uppercase tracking-widest">Fine Dining</span>
+                </div>
+                <p className="font-display text-2xl">Le Royal Khmer</p>
+              </div>
+            </motion.div>
+
+            {/* Text Side */}
+            <motion.div 
+              variants={staggerContainer}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              className="md:pl-10"
+            >
+              <motion.div variants={fadeInUp} className="mb-6 text-[#d4af37] flex items-center gap-3">
+                <Utensils className="w-5 h-5" />
+                <span className="text-xs uppercase tracking-[0.2em]">Culinary Artistry</span>
+              </motion.div>
+              
+              <motion.h3 variants={fadeInUp} className="text-4xl md:text-6xl font-display font-light mb-8 leading-tight">
+                Taste the <br/> <span className="italic font-serif text-[#d4af37]">Extraordinary</span>
+              </motion.h3>
+              
+              <motion.p variants={fadeInUp} className="text-slate-400 text-lg font-light leading-relaxed mb-10">
+                Experience the finest Khmer and French fusion cuisine. 
+                Our executive chefs craft menus that celebrate local heritage with global flair,
+                using ingredients sourced from our own organic gardens.
+              </motion.p>
+              
+              <motion.div variants={fadeInUp}>
+                <Button variant="outline" className="h-12 px-8 border-[#d4af37] text-[#d4af37] hover:bg-[#d4af37] hover:text-black rounded-none uppercase tracking-widest text-xs transition-all duration-300">
+                  Discover Dining
                 </Button>
-              </Link>
-            </div>
-            {/* Image/Banner Container */}
-            <div className={`relative h-64 sm:h-80 md:h-96 w-full bg-gradient-to-br from-slate-800 to-slate-900 rounded-sm overflow-hidden glass-banner border border-white/10 group ${diningSection.isVisible ? 'scroll-fade-in-right' : ''}`}>
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-900/40 to-transparent" />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-center p-4">
-                  <Sparkles className="w-12 h-12 sm:w-16 sm:h-16 text-[#d4af37]/50 mx-auto mb-4" />
-                  <p className="text-white/60 text-sm font-light">Culinary Artistry</p>
-                </div>
-              </div>
-            </div>
+              </motion.div>
+            </motion.div>
           </div>
         </div>
       </section>
 
-      {/* Final CTA Section */}
-      <section 
-        ref={finalCtaSection.ref}
-        className="py-24 md:py-32 lg:py-40 bg-gradient-to-br from-black via-slate-950 to-black text-white text-center relative overflow-hidden"
-      >
-        <div className={`relative z-10 container mx-auto px-4 sm:px-6 ${finalCtaSection.isVisible ? 'scroll-fade-in-up' : ''}`}>
-          <Sparkles className={`w-10 h-10 sm:w-14 sm:h-14 mx-auto mb-6 sm:mb-8 text-[#d4af37] animate-pulse ${finalCtaSection.isVisible ? 'scroll-fade-in' : ''}`} />
+      {/* 
+        =============================================
+        8. TESTIMONIALS (Social Proof)
+        =============================================
+      */}
+      <section className="py-24 bg-white">
+        <div className="container mx-auto px-6 text-center">
+          <Quote className="w-12 h-12 text-[#d4af37]/30 mx-auto mb-8" />
+          <h3 className="text-3xl font-display text-slate-900 mb-12">Guest Impressions</h3>
           
-          <h2 className={`text-3xl sm:text-5xl lg:text-7xl font-display font-light mb-6 sm:mb-8 leading-tight ${finalCtaSection.isVisible ? 'scroll-fade-in-up scroll-stagger-1' : ''}`}>
-            Begin Your <span className="font-semibold text-transparent bg-gradient-to-r from-[#d4af37] to-white bg-clip-text">Extraordinary Journey</span>
-          </h2>
-          
-          <p className={`text-base sm:text-lg md:text-xl text-slate-300 mb-8 sm:mb-12 max-w-2xl mx-auto font-light leading-relaxed ${finalCtaSection.isVisible ? 'scroll-fade-in-up scroll-stagger-2' : ''}`}>
-            Reserve your stay today and discover why discerning guests return to us again and again.
-          </p>
-
-          <Link href="/rooms" className="block sm:inline-block">
-            <Button size="lg" className={`w-full sm:w-auto rounded-sm px-10 py-6 text-base bg-white text-slate-900 hover:bg-[#d4af37] hover:text-black transition-all duration-300 shadow-lg ${finalCtaSection.isVisible ? 'scroll-fade-in-up scroll-stagger-4' : ''}`}>
-              <Calendar className="w-4 h-4 mr-2" />
-              BOOK YOUR STAY
-            </Button>
-          </Link>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <TestimonialCard 
+              text="An absolute masterpiece of hospitality. The attention to detail is unmatched in all of Southeast Asia."
+              author="James W."
+              location="London, UK"
+              delay={0}
+            />
+            <TestimonialCard 
+              text="The most magical stay of our lives. The sunrise view from the Royal Suite is something we will never forget."
+              author="Sophie L."
+              location="Paris, France"
+              delay={0.2}
+            />
+            <TestimonialCard 
+              text="True 7-star service. The staff anticipated our needs before we even realized them ourselves."
+              author="Michael Chen"
+              location="Singapore"
+              delay={0.4}
+            />
+          </div>
         </div>
       </section>
-    </>
+
+      {/* 
+        =============================================
+        9. FINAL CTA
+        =============================================
+      */}
+  <section className="relative py-32 md:py-48 flex items-center justify-center bg-slate-800 overflow-hidden">
+        {/* Animated Gradient Background */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(212,175,55,0.08),transparent_70%)]" />
+        
+        <motion.div 
+          variants={staggerContainer}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          className="relative z-10 container mx-auto px-6 text-center"
+        >
+          <motion.div variants={fadeInUp} className="flex justify-center mb-8">
+            <Palmtree className="w-12 h-12 text-[#d4af37] opacity-80" />
+          </motion.div>
+
+          <motion.h2 variants={fadeInUp} className="text-4xl sm:text-6xl lg:text-8xl font-display font-light text-white mb-8 leading-tight">
+            Your Kingdom <br/> <span className="font-semibold italic font-serif text-transparent bg-gradient-to-r from-[#d4af37] via-[#f9f1d0] to-[#d4af37] bg-clip-text">Awaits</span>
+          </motion.h2>
+          
+          <motion.p variants={fadeInUp} className="text-base sm:text-lg md:text-2xl text-slate-400 mb-12 max-w-2xl mx-auto font-light leading-relaxed">
+            Reserve your stay today and discover why discerning guests return to us again and again.
+          </motion.p>
+
+          <motion.div variants={fadeInUp}>
+            <Link href="/rooms" className="inline-block">
+              <Button size="lg" className="h-16 px-12 text-base bg-white text-slate-900 hover:bg-[#d4af37] hover:text-white transition-all duration-500 rounded-none shadow-[0_0_50px_-15px_rgba(255,255,255,0.3)]">
+                <Calendar className="w-4 h-4 mr-3" />
+                <span className="tracking-[0.2em] uppercase text-xs font-bold">Book Your Stay</span>
+              </Button>
+            </Link>
+          </motion.div>
+        </motion.div>
+      </section>
+
+    </div>
+  )
+}
+
+// --- HELPER COMPONENTS ---
+
+function InfoItem({ icon: Icon, title, value, delay = 0 }: { icon: any, title: string, value: string, delay?: number }) {
+  return (
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ delay, duration: 0.8, ease: "easeOut" }}
+      className="flex items-start gap-4 group"
+    >
+      <div className="p-3 border border-[#d4af37]/20 rounded-full group-hover:border-[#d4af37] group-hover:bg-[#d4af37]/10 transition-colors duration-500">
+        <Icon className="w-5 h-5 text-[#d4af37]" />
+      </div>
+      <div>
+        <h4 className="text-[10px] uppercase tracking-[0.2em] text-slate-400 mb-1">{title}</h4>
+        <p className="font-display text-lg text-white font-light">{value}</p>
+      </div>
+    </motion.div>
+  )
+}
+
+function RoomCard({ title, price, image, delay }: { title: string, price: string, image: string, delay: number }) {
+  return (
+    <motion.div 
+      initial={{ opacity: 0, y: 40 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ delay, duration: 1, ease: [0.25, 0.4, 0.25, 1] }}
+      className="group cursor-pointer"
+    >
+      <div className="relative aspect-[4/3] overflow-hidden mb-6">
+        <div className="absolute inset-0 bg-slate-900/10 group-hover:bg-transparent transition-colors duration-500 z-10" />
+        <motion.div 
+          whileHover={{ scale: 1.1 }}
+          transition={{ duration: 1.5, ease: "easeOut" }}
+          className="w-full h-full bg-cover bg-center"
+          style={{ backgroundImage: `url('${image}')` }}
+        />
+      </div>
+      <div className="flex justify-between items-start border-b border-slate-200 pb-4 group-hover:border-[#d4af37] transition-colors duration-500">
+        <div>
+          <h4 className="text-xl font-display text-slate-900 mb-1 group-hover:text-[#d4af37] transition-colors duration-300">{title}</h4>
+          <p className="text-xs uppercase tracking-widest text-slate-500">City View • 45sqm</p>
+        </div>
+        <span className="font-serif italic text-lg text-slate-900">{price}</span>
+      </div>
+    </motion.div>
+  )
+}
+
+function TestimonialCard({ text, author, location, delay }: { text: string, author: string, location: string, delay: number }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.9 }}
+      whileInView={{ opacity: 1, scale: 1 }}
+      viewport={{ once: true }}
+      transition={{ delay, duration: 0.8, ease: "easeOut" }}
+      className="p-8 bg-slate-50 border border-slate-100 shadow-sm hover:shadow-lg transition-all duration-300"
+    >
+      <div className="flex justify-center gap-1 text-[#d4af37] mb-6">
+        {[...Array(5)].map((_, i) => <Star key={i} size={14} fill="currentColor" />)}
+      </div>
+      <p className="text-slate-600 font-light italic mb-6 leading-relaxed">"{text}"</p>
+      <div>
+        <h5 className="text-slate-900 font-display font-medium">{author}</h5>
+        <span className="text-xs text-slate-400 uppercase tracking-widest">{location}</span>
+      </div>
+    </motion.div>
   )
 }

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import type { User as SupabaseUser } from "@supabase/supabase-js"
 import { PremiumNavbar } from "@/components/layout/premium-navbar"
+import { PremiumFooter } from "@/components/layout/premium-footer"
 import { RoomCard } from "@/components/user/room-card"
 import Loading from "@/components/ui/loading"
 import { UnifiedBookingForm } from "@/components/booking/unified-booking-form"
@@ -214,6 +215,7 @@ export default function RoomsPage() {
           </div>
         )}
       </main>
+      <PremiumFooter/>
     </div>
   )
 }

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import type { User as SupabaseUser } from "@supabase/supabase-js"
 import { PremiumNavbar } from "@/components/layout/premium-navbar"
+import { PremiumFooter } from "@/components/layout/premium-footer"
 import { ServiceCard } from "@/components/user/service-card"
 import Loading from "@/components/ui/loading"
 import type { Service, ServiceCategory } from "@/lib/types"
@@ -86,7 +87,7 @@ export default function ServicesPage() {
 
   const handleBookService = (service: Service) => {
     if (!user) {
-      router.push("/login")
+      router.push("/auth/login")
       return
     }
     // Navigate to service booking page
@@ -186,6 +187,7 @@ export default function ServicesPage() {
           </Button>
         </div>
       </main>
+      <PremiumFooter />
     </div>
   )
 }

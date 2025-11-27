@@ -10,6 +10,7 @@ import Image from "next/image"
 import { getBookingsByUser, getRoomTypes, getRooms } from "@/lib/supabase-service"
 import type { Booking, RoomType, Room } from "@/lib/types"
 import { PremiumNavbar } from "@/components/layout/premium-navbar"
+import { PremiumFooter } from "@/components/layout/premium-footer"
 import Loading from "@/components/ui/loading"
 
 interface User {
@@ -279,6 +280,7 @@ export default function UserHomePage() {
           </div>
         </div>
       </main>
+      <PremiumFooter />
     </div>
   )
 }

@@ -78,7 +78,7 @@ function LoginPageContent() {
   ]
 
   return (
-    <main className="min-h-screen w-full flex bg-slate-50 dark:bg-slate-950">
+    <main className="min-h-screen w-full flex bg-gradient-to-br from-background via-accent/5 to-background">
       
       {/* LEFT SIDE: Form Area */}
       <div className="flex-1 flex flex-col items-center justify-center p-6 sm:p-12 lg:p-16 relative z-10">
@@ -88,17 +88,19 @@ function LoginPageContent() {
           transition={{ duration: 0.5 }}
           className="w-full max-w-[400px] space-y-8"
         >
-          {/* Mobile Logo (Visible on small screens) */}
+          {/* Mobile Logo (Official) */}
           <div className="flex justify-center lg:justify-start">
-            <Link href="/" className="flex items-center gap-3 group">
-              <div className="w-10 h-10 rounded-lg bg-slate-900 text-[#d4af37] flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform duration-300">
-                <Hotel className="w-6 h-6" />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-xl font-display font-bold text-slate-900 tracking-wide">
-                  ROYAL<span className="text-[#d4af37]">ELEGANCE</span>
+            {/* Logo links to home for unauthenticated pages to avoid referencing undefined `user` */}
+            <Link href="/" className="relative z-50 flex flex-col items-start group">
+              <span className={`text-xl sm:text-2xl font-display font-bold tracking-widest transition-colors duration-300 text-slate-900`}>
+                ROYAL
+                <span className={`ml-1 bg-slate-800 px-2 transition-colors duration-300 text-[#d4af37]`}>
+                  ELEGANCE
                 </span>
-              </div>
+              </span>
+              <span className={`text-[9px] sm:text-[10px] tracking-[0.3em] uppercase transition-colors duration-300 text-slate-500`}>
+                Luxury Hotel & Residences
+              </span>
             </Link>
           </div>
 
@@ -146,14 +148,14 @@ function LoginPageContent() {
         <div className="absolute inset-0">
            {/* Replace src with your actual image path */}
            <Image 
-             src="/luxury-hotel-lobby.png" 
+             src="https://images.pexels.com/photos/8192323/pexels-photo-8192323.jpeg?_gl=1*fftdfp*_ga*MTY4NjM2ODA2MC4xNzY0MjIyNjU0*_ga_8JE65Q40S6*czE3NjQyMjI2NTMkbzEkZzEkdDE3NjQyMjI3MjMkajU5JGwwJGgw" 
              alt="Luxury Hotel Lobby"
              fill
              className="object-cover opacity-60"
              priority
-           />
-           <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/50 to-transparent" />
-        </div>
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-800 via-slate-800/50 to-transparent" />
+      </div>
 
         {/* Content Overlay */}
         <div className="relative z-10 flex flex-col justify-end p-16 w-full h-full text-white space-y-12">

@@ -21,6 +21,7 @@ import type { User as SupabaseUser } from "@supabase/supabase-js"
 import { getBookings, getBookingsByUser, getRooms, getRoomTypes, getServices, updateBooking } from "@/lib/supabase-service"
 import type { Booking, Room, RoomType, Service } from "@/lib/types"
 import { PremiumNavbar } from "@/components/layout/premium-navbar"
+import { PremiumFooter } from "@/components/layout/premium-footer"
 import { StripePaymentElementWrapper } from "@/components/payment/stripe-payment-element"
 import { TestCardInfo } from "@/components/payment/test-card-info"
 import Loading from "@/components/ui/loading"
@@ -194,6 +195,7 @@ function PaymentPageContent() {
           </div>
         </div>
       </main>
+      <PremiumFooter />
     </div>
   )
 }
