@@ -44,7 +44,7 @@ export function PremiumHeroSection() {
         1. HERO SECTION
         =============================================
       */}
-      <section ref={targetRef} className="relative h-[100dvh] min-h-[800px] w-full flex items-center justify-center overflow-hidden bg-black">
+  <section ref={targetRef} className="relative h-[80vh] min-h-[520px] w-full flex items-center justify-center overflow-hidden bg-black">
         
         {/* VIDEO BACKGROUND LAYER */}
         <motion.div style={{ y: yBg }} className="absolute inset-0 z-0">
@@ -70,19 +70,19 @@ export function PremiumHeroSection() {
           initial="hidden"
           animate="visible"
           // ADDED: max-w constraints and 2xl scaling
-          className="relative z-20 container mx-auto px-6 text-center pt-20 max-w-[1920px]"
+          className="relative z-20 container mx-auto px-6 text-center pt-12 max-w-[1400px]"
         >
           {/* Badge */}
-          <motion.div variants={fadeInUp} className="inline-flex items-center gap-2 px-6 py-2 rounded-full border border-[#d4af37]/30 bg-black/40 backdrop-blur-md mb-8 ring-1 ring-[#d4af37]/20">
+          <motion.div variants={fadeInUp} className="inline-flex items-center gap-2 px-4 py-1 rounded-full border border-[#d4af37]/30 bg-black/40 backdrop-blur-md mb-4 ring-1 ring-[#d4af37]/20">
             <Star className="w-3 h-3 text-[#d4af37] fill-[#d4af37]" />
-            <span className="text-[10px] md:text-xs 2xl:text-sm text-[#d4af37] tracking-[0.25em] uppercase font-light">
+            <span className="text-[9px] md:text-[10px] text-[#d4af37] tracking-[0.2em] uppercase font-light">
               The Illustrate of Khmer Culture
             </span>
             <Star className="w-3 h-3 text-[#d4af37] fill-[#d4af37]" />
           </motion.div>
 
           {/* Heading - ADDED: 2xl:text-[10rem] for ultrawide impact */}
-          <motion.h1 variants={fadeInUp} className="text-5xl md:text-7xl lg:text-9xl 2xl:text-[10rem] font-display font-light text-white mb-8 leading-[1.1] tracking-tight drop-shadow-2xl">
+          <motion.h1 variants={fadeInUp} className="text-4xl md:text-6xl lg:text-8xl font-display font-light text-white mb-6 leading-[1.05] tracking-tight drop-shadow-2xl">
             The Spirit of Luxury <br className="hidden md:block"/>
             <span className="text-transparent bg-gradient-to-r from-[#d4af37] via-[#f3e5b5] to-[#d4af37] bg-clip-text font-serif italic pr-4">
               Kingdom Of Cambodia
@@ -90,20 +90,20 @@ export function PremiumHeroSection() {
           </motion.h1>
 
           {/* Subheading - ADDED: max-w constraint to prevent line stretching */}
-          <motion.p variants={fadeInUp} className="max-w-2xl 2xl:max-w-4xl mx-auto text-lg md:text-xl 2xl:text-2xl text-white/90 font-light leading-relaxed mb-12 text-balance shadow-black drop-shadow-md">
+          <motion.p variants={fadeInUp} className="max-w-2xl 2xl:max-w-4xl mx-auto text-base md:text-lg text-white/90 font-light leading-relaxed mb-6 text-balance drop-shadow-md">
             Experience the warmth of Cambodian hospitality in a sanctuary designed for royalty. 
             An oasis of serenity in the heart of the Kingdom.
           </motion.p>
 
           {/* Buttons */}
-          <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row gap-6 justify-center">
+          <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/rooms">
-              <Button size="lg" className="w-full sm:w-auto min-w-[200px] 2xl:min-w-[240px] h-14 2xl:h-16 2xl:text-sm bg-white text-slate-900 hover:bg-[#d4af37] hover:text-white rounded-none tracking-widest text-xs uppercase font-medium transition-all duration-500 shadow-[0_0_40px_-10px_rgba(255,255,255,0.3)]">
+              <Button size="lg" className="w-full sm:w-auto min-w-[160px] 2xl:min-w-[200px] h-12 bg-white text-slate-900 hover:bg-[#d4af37] hover:text-white rounded-none tracking-widest text-xs uppercase font-medium transition-all duration-400 shadow-[0_0_30px_-8px_rgba(255,255,255,0.25)]">
                 Reserve Suite
               </Button>
             </Link>
             <Link href="/dining">
-              <Button size="lg" variant="outline" className="w-full sm:w-auto min-w-[200px] 2xl:min-w-[240px] h-14 2xl:h-16 2xl:text-sm border-white/40 text-white hover:bg-white hover:text-slate-900 rounded-none tracking-widest text-xs uppercase font-medium transition-all duration-500 backdrop-blur-sm">
+              <Button size="lg" variant="outline" className="w-full sm:w-auto min-w-[160px] 2xl:min-w-[200px] h-12 border-white/40 text-white hover:bg-white hover:text-slate-900 rounded-none tracking-widest text-xs uppercase font-medium transition-all duration-400 backdrop-blur-sm">
                 Explore The Hotel
               </Button>
             </Link>
@@ -115,10 +115,10 @@ export function PremiumHeroSection() {
            initial={{ opacity: 0 }} 
            animate={{ opacity: 1 }} 
            transition={{ delay: 2, duration: 1 }}
-           className="absolute bottom-10 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2"
+           className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2"
         >
-          <div className="w-[1px] h-16 bg-gradient-to-b from-transparent via-[#d4af37] to-transparent animate-pulse" />
-          <span className="text-[10px] uppercase tracking-widest text-[#d4af37]/80">Scroll</span>
+          <div className="w-[1px] h-12 bg-gradient-to-b from-transparent via-[#d4af37] to-transparent animate-pulse" />
+          <span className="text-[9px] uppercase tracking-widest text-[#d4af37]/80">Scroll</span>
         </motion.div>
       </section>
 
@@ -127,7 +127,7 @@ export function PremiumHeroSection() {
         2. FLOATING INFO BAR
         =============================================
       */}
-      <div className="relative z-30 -mt-24 px-4 pb-20">
+  <div className="relative z-30 -mt-16 px-4 pb-16">
         <motion.div 
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
