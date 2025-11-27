@@ -1,519 +1,445 @@
 "use client"
 
-import type React from "react"
+import React, { useState, useEffect } from "react"
+import { motion, AnimatePresence } from "framer-motion"
+import { 
+  User, Lock, Monitor, Shield, Mail, Phone, 
+  Camera, Loader2, Save, Trash2, Eye, EyeOff, 
+  LogOut, AlertCircle, CheckCircle2 
+} from "lucide-react"
 
-import { useState, useEffect } from "react"
+// Types & Libs
 import { createClient } from "@/lib/supabase/client"
 import type { User as SupabaseUser } from "@supabase/supabase-js"
+import { useToast } from "@/hooks/use-toast"
+
+// UI Components
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
-import { useToast } from "@/hooks/use-toast"
-import { User, Mail, Phone, Lock, Monitor, Shield, Eye, EyeOff, Trash2 } from "lucide-react"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { cn } from "@/lib/utils"
+
+// --- Types ---
+
+interface ProfileData {
+  fullName: string
+  phone: string
+  avatarUrl: string | null
+}
+
+interface Session {
+  id: string
+  device_info: string
+  last_activity: string
+  ip_address?: string
+  is_current?: boolean
+}
+
+// --- Main Layout Component ---
 
 export function ProfileSettings() {
+  const [activeTab, setActiveTab] = useState("general")
   const [user, setUser] = useState<SupabaseUser | null>(null)
-  const { toast } = useToast()
+  const [isLoading, setIsLoading] = useState(true)
 
-  // Profile state
-  const [fullName, setFullName] = useState("")
-  const [phone, setPhone] = useState("")
-  const [isUpdatingProfile, setIsUpdatingProfile] = useState(false)
-
-  // Password state
-  const [currentPassword, setCurrentPassword] = useState("")
-  const [newPassword, setNewPassword] = useState("")
-  const [confirmPassword, setConfirmPassword] = useState("")
-  const [showCurrentPassword, setShowCurrentPassword] = useState(false)
-  const [showNewPassword, setShowNewPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [isUpdatingPassword, setIsUpdatingPassword] = useState(false)
-
-  // Sessions state
-  const [sessions, setSessions] = useState<any[]>([])
-  const [isLoadingSessions, setIsLoadingSessions] = useState(true)
+  const supabase = createClient()
 
   useEffect(() => {
-    const supabase = createClient()
-    
-    // Get initial user
-    supabase.auth.getUser().then(({ data }: { data: { user: SupabaseUser | null } }) => {
-      const u = (data as any)?.user ?? null
-      setUser(u)
-      if (u?.user_metadata?.full_name) {
-        setFullName(u.user_metadata.full_name)
-      }
-      if (u?.user_metadata?.phone) {
-        setPhone(u.user_metadata.phone)
-      }
-    })
-
-    // Subscribe to auth changes
-    const { data } = supabase.auth.onAuthStateChange((_event: string, session: any) => {
-      setUser(session?.user ?? null)
-    })
-
-    const subscription = (data as any)?.subscription ?? data
-
-    return () => subscription?.unsubscribe?.()
-  }, [])
-
-  useEffect(() => {
-    loadSessions()
-  }, [])
-
-  const updateProfile = async (updates: any) => {
-    const supabase = createClient()
-    const { error } = await supabase.auth.updateUser({
-      data: updates,
-    })
-    if (error) throw error
-  }
-
-  const updatePassword = async (currentPassword: string, newPassword: string) => {
-    const supabase = createClient()
-    const { error } = await supabase.auth.updateUser({
-      password: newPassword,
-    })
-    if (error) throw error
-  }
-
-  const resendEmailVerification = async () => {
-    const supabase = createClient()
-    // Resend verification email logic
-    const { data } = await supabase.auth.getUser()
-    const user = (data as any)?.user ?? null
-    if (!user?.email) throw new Error("No email found")
-
-    // In a real app, call your email sending API
-    // For now just notify user
-    return Promise.resolve()
-  }
-
-  const getUserSessions = async () => {
-    // Mock sessions for demo
-    return [
-      {
-        id: "1",
-        device: "Chrome on macOS",
-        lastActive: new Date(Date.now() - 5000),
-        location: "New York, USA",
-      },
-    ]
-  }
-
-  const deleteSession = async (sessionId: string) => {
-    // Mock delete for demo
-    return Promise.resolve()
-  }
-
-  const loadSessions = async () => {
-    setIsLoadingSessions(true)
-    try {
-      const userSessions = await getUserSessions()
-      setSessions(userSessions)
-    } catch (error) {
-      console.error("Error loading sessions:", error)
-    } finally {
-      setIsLoadingSessions(false)
+    const init = async () => {
+      const { data } = await supabase.auth.getUser()
+      setUser(data.user)
+      setIsLoading(false)
     }
-  }
+    init()
+  }, [supabase])
 
-  const handleUpdateProfile = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsUpdatingProfile(true)
+  const menuItems = [
+    { id: "general", label: "General", icon: User, description: "Profile details & avatar" },
+    { id: "security", label: "Security", icon: Lock, description: "Password & 2FA" },
+    { id: "sessions", label: "Sessions", icon: Monitor, description: "Manage devices" },
+    { id: "verification", label: "Verification", icon: Shield, description: "Identity status" },
+  ]
 
-    try {
-      await updateProfile({ fullName, phone })
-      toast({
-        title: "Profile Updated",
-        description: "Your profile has been updated successfully.",
-      })
-    } catch (error: any) {
-      toast({
-        title: "Update Failed",
-        description: error.message || "Failed to update profile.",
-        variant: "destructive",
-      })
-    } finally {
-      setIsUpdatingProfile(false)
-    }
-  }
-
-  const handleUpdatePassword = async (e: React.FormEvent) => {
-    e.preventDefault()
-
-    if (newPassword !== confirmPassword) {
-      toast({
-        title: "Passwords Don't Match",
-        description: "Please make sure your passwords match.",
-        variant: "destructive",
-      })
-      return
-    }
-
-    setIsUpdatingPassword(true)
-
-    try {
-      await updatePassword(currentPassword, newPassword)
-      toast({
-        title: "Password Updated",
-        description: "Your password has been changed successfully.",
-      })
-      setCurrentPassword("")
-      setNewPassword("")
-      setConfirmPassword("")
-    } catch (error: any) {
-      toast({
-        title: "Update Failed",
-        description: error.message || "Failed to update password.",
-        variant: "destructive",
-      })
-    } finally {
-      setIsUpdatingPassword(false)
-    }
-  }
-
-  const handleResendVerification = async () => {
-    try {
-      await resendEmailVerification()
-      toast({
-        title: "Verification Email Sent",
-        description: "Please check your inbox for the verification link.",
-      })
-    } catch (error: any) {
-      toast({
-        title: "Failed to Send Email",
-        description: error.message || "Please try again later.",
-        variant: "destructive",
-      })
-    }
-  }
-
-  const handleDeleteSession = async (sessionId: string) => {
-    try {
-      await deleteSession(sessionId)
-      toast({
-        title: "Session Deleted",
-        description: "The session has been removed.",
-      })
-      loadSessions()
-    } catch (error: any) {
-      toast({
-        title: "Delete Failed",
-        description: error.message || "Failed to delete session.",
-        variant: "destructive",
-      })
-    }
-  }
-
-  if (!user) {
+  if (isLoading) {
     return (
-      <Card className="glass-card">
-        <CardContent className="p-6 text-center text-muted-foreground">
-          Please sign in to view your profile settings.
-        </CardContent>
-      </Card>
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
     )
   }
 
+  if (!user) return null
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 animate-in fade-in duration-500">
+      {/* Header */}
       <div>
-        <h2 className="text-3xl font-display font-bold">Profile Settings</h2>
-        <p className="text-muted-foreground">Manage your account settings and preferences</p>
+        <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
+        <p className="text-muted-foreground mt-1">Manage your account settings and set e-mail preferences.</p>
       </div>
+      
+      <Separator />
 
-      <Tabs defaultValue="profile" className="w-full">
-    <TabsList className="grid w-full grid-cols-4 h-full">
-          <TabsTrigger value="profile">
-            <User className="w-4 h-4 mr-2" />
-            Profile
-          </TabsTrigger>
-          <TabsTrigger value="security">
-            <Lock className="w-4 h-4 mr-2" />
-            Security
-          </TabsTrigger>
-          <TabsTrigger value="sessions">
-            <Monitor className="w-4 h-4 mr-2" />
-            Sessions
-          </TabsTrigger>
-          <TabsTrigger value="verification">
-            <Shield className="w-4 h-4 mr-2" />
-            Verification
-          </TabsTrigger>
-        </TabsList>
-
-        {/* Profile Tab */}
-        <TabsContent value="profile">
-          <Card className="glass-card">
-            <CardHeader>
-              <CardTitle>Personal Information</CardTitle>
-              <CardDescription>Update your personal details</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleUpdateProfile} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input id="email" type="email" value={user.email} disabled className="glass" />
-                  <p className="text-xs text-muted-foreground">Email cannot be changed</p>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="fullName">Full Name</Label>
-                  <Input
-                    id="fullName"
-                    type="text"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    className="glass"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Phone Number</Label>
-                  <Input
-                    id="phone"
-                    type="tel"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    className="glass"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Role</Label>
-                  <div>
-                    <Badge variant="secondary" className="capitalize">
-                      {user.role}
-                    </Badge>
-                  </div>
-                </div>
-
-                <Button type="submit" disabled={isUpdatingProfile}>
-                  {isUpdatingProfile ? "Updating..." : "Update Profile"}
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Security Tab */}
-        <TabsContent value="security">
-          <Card className="glass-card">
-            <CardHeader>
-              <CardTitle>Change Password</CardTitle>
-              <CardDescription>Update your password to keep your account secure</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleUpdatePassword} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="currentPassword">Current Password</Label>
-                  <div className="relative">
-                    <Input
-                      id="currentPassword"
-                      type={showCurrentPassword ? "text" : "password"}
-                      value={currentPassword}
-                      onChange={(e) => setCurrentPassword(e.target.value)}
-                      required
-                      className="glass pr-10"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                    >
-                      {showCurrentPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="newPassword">New Password</Label>
-                  <div className="relative">
-                    <Input
-                      id="newPassword"
-                      type={showNewPassword ? "text" : "password"}
-                      value={newPassword}
-                      onChange={(e) => setNewPassword(e.target.value)}
-                      required
-                      className="glass pr-10"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowNewPassword(!showNewPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                    >
-                      {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="confirmPassword">Confirm New Password</Label>
-                  <div className="relative">
-                    <Input
-                      id="confirmPassword"
-                      type={showConfirmPassword ? "text" : "password"}
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      required
-                      className="glass pr-10"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                    >
-                      {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
-                  </div>
-                </div>
-
-                <Button type="submit" disabled={isUpdatingPassword}>
-                  {isUpdatingPassword ? "Updating..." : "Update Password"}
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Sessions Tab */}
-        <TabsContent value="sessions">
-          <Card className="glass-card">
-            <CardHeader>
-              <CardTitle>Active Sessions</CardTitle>
-              <CardDescription>Manage your active sessions across devices</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {isLoadingSessions ? (
-                <div className="text-center py-8 text-muted-foreground">Loading sessions...</div>
-              ) : sessions.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">No active sessions found</div>
-              ) : (
-                <div className="space-y-4">
-                  {sessions.map((session) => (
-                    <div
-                      key={session.id}
-                      className="flex items-start justify-between p-4 rounded-lg border border-border/50 bg-card/50"
-                    >
-                      <div className="flex items-start gap-3">
-                        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                          <Monitor className="w-5 h-5 text-primary" />
-                        </div>
-                        <div>
-                          <p className="font-medium">{session.device_info || "Unknown Device"}</p>
-                          <p className="text-sm text-muted-foreground">
-                            Last active: {new Date(session.last_activity).toLocaleString()}
-                          </p>
-                          {session.ip_address && (
-                            <p className="text-xs text-muted-foreground">IP: {session.ip_address}</p>
-                          )}
-                        </div>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleDeleteSession(session.id)}
-                        className="text-destructive hover:text-destructive"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Verification Tab */}
-        <TabsContent value="verification">
-          <Card className="glass-card">
-            <CardHeader>
-              <CardTitle>Account Verification</CardTitle>
-              <CardDescription>Verify your email and phone number</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Email Verification */}
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <Mail className="w-5 h-5 text-muted-foreground" />
-                    <div>
-                      <p className="font-medium">Email Verification</p>
-                      <p className="text-sm text-muted-foreground">{user.email}</p>
-                    </div>
-                  </div>
-                  {user.email_confirmed_at ? (
-                    <Badge className="bg-green-500/20 text-green-700">Verified</Badge>
-                  ) : (
-                    <Badge variant="destructive">Not Verified</Badge>
-                  )}
-                </div>
-                {!user.email_confirmed_at && (
-                  <Button variant="outline" onClick={handleResendVerification} className="w-full">
-                    Resend Verification Email
-                  </Button>
+      <div className="flex flex-col lg:flex-row gap-8">
+        {/* Sidebar Navigation */}
+        <aside className="lg:w-1/5">
+          <nav className="flex lg:flex-col gap-2 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0 scrollbar-hide">
+            {menuItems.map((item) => (
+              <Button
+                key={item.id}
+                variant={activeTab === item.id ? "secondary" : "ghost"}
+                className={cn(
+                  "justify-start gap-3 whitespace-nowrap",
+                  activeTab === item.id ? "bg-secondary font-medium" : "text-muted-foreground"
                 )}
-              </div>
+                onClick={() => setActiveTab(item.id)}
+              >
+                <item.icon className="w-4 h-4" />
+                {item.label}
+              </Button>
+            ))}
+          </nav>
+        </aside>
 
-              <Separator />
-
-              {/* Phone Verification */}
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <Phone className="w-5 h-5 text-muted-foreground" />
-                    <div>
-                      <p className="font-medium">Phone Verification</p>
-                      <p className="text-sm text-muted-foreground">{user.user_metadata?.phone || "No phone number"}</p>
-                    </div>
-                  </div>
-                  {user.phone_confirmed_at ? (
-                    <Badge className="bg-green-500/20 text-green-700">Verified</Badge>
-                  ) : (
-                    <Badge variant="secondary">Not Verified</Badge>
-                  )}
-                </div>
-                {user.user_metadata?.phone && !user.phone_confirmed_at && (
-                  <Button variant="outline" className="w-full" disabled>
-                    Verify Phone (Coming Soon)
-                  </Button>
-                )}
-              </div>
-
-              <Separator />
-
-              {/* MFA Status */}
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <Shield className="w-5 h-5 text-muted-foreground" />
-                    <div>
-                      <p className="font-medium">Two-Factor Authentication</p>
-                      <p className="text-sm text-muted-foreground">Add an extra layer of security</p>
-                    </div>
-                  </div>
-                  {false ? (
-                    <Badge className="bg-green-500/20 text-green-700">Enabled</Badge>
-                  ) : (
-                    <Badge variant="secondary">Disabled</Badge>
-                  )}
-                </div>
-                <Button variant="outline" className="w-full" disabled>
-                  {false ? "Manage 2FA" : "Enable 2FA"} (Coming Soon)
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+        {/* Main Content Area */}
+        <main className="flex-1 max-w-2xl">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
+            >
+              {activeTab === "general" && <GeneralSection user={user} />}
+              {activeTab === "security" && <SecuritySection />}
+              {activeTab === "sessions" && <SessionsSection />}
+              {activeTab === "verification" && <VerificationSection user={user} />}
+            </motion.div>
+          </AnimatePresence>
+        </main>
+      </div>
     </div>
   )
 }
 
+// --- Sub-Components ---
+
+// 1. General Profile Section
+function GeneralSection({ user }: { user: SupabaseUser }) {
+  const { toast } = useToast()
+  const [isSaving, setIsSaving] = useState(false)
+  const [formData, setFormData] = useState<ProfileData>({
+    fullName: user.user_metadata?.full_name || "",
+    phone: user.user_metadata?.phone || "",
+    avatarUrl: user.user_metadata?.avatar_url || null
+  })
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsSaving(true)
+    const supabase = createClient()
+
+    try {
+      const { error } = await supabase.auth.updateUser({
+        data: { full_name: formData.fullName, phone: formData.phone }
+      })
+      if (error) throw error
+      toast({ title: "Success", description: "Profile updated successfully." })
+    } catch (error: any) {
+      toast({ title: "Error", description: error.message, variant: "destructive" })
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Profile</CardTitle>
+          <CardDescription>This information will be displayed publicly.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          
+          {/* Avatar Upload Block */}
+          <div className="flex items-center gap-6">
+            <div className="relative group">
+              <Avatar className="w-20 h-20 border-2 border-border cursor-pointer">
+                <AvatarImage src={formData.avatarUrl || ""} className="object-cover"/>
+                <AvatarFallback className="text-xl bg-muted">{formData.fullName?.[0]?.toUpperCase() || "U"}</AvatarFallback>
+              </Avatar>
+              <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                <Camera className="w-6 h-6 text-white" />
+              </div>
+            </div>
+            <div className="space-y-1">
+              <h4 className="font-medium text-sm">Profile Picture</h4>
+              <p className="text-xs text-muted-foreground max-w-[200px]">
+                JPG, GIF or PNG. Max size of 2MB.
+              </p>
+              <Button variant="outline" size="sm" className="h-8 text-xs mt-2">Upload New</Button>
+            </div>
+          </div>
+
+          <Separator />
+
+          <form id="profile-form" onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid gap-2">
+              <Label htmlFor="email">Email Address</Label>
+              <Input value={user.email} disabled className="bg-muted/50" />
+              <p className="text-[10px] text-muted-foreground flex items-center gap-1">
+                <Lock className="w-3 h-3" /> Email cannot be changed here.
+              </p>
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="fullName">Full Name</Label>
+              <Input 
+                id="fullName" 
+                value={formData.fullName} 
+                onChange={(e) => setFormData({...formData, fullName: e.target.value})} 
+                placeholder="Jane Doe"
+              />
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="phone">Phone Number</Label>
+              <Input 
+                id="phone" 
+                type="tel" 
+                value={formData.phone} 
+                onChange={(e) => setFormData({...formData, phone: e.target.value})} 
+                placeholder="+1 (555) 000-0000"
+              />
+            </div>
+          </form>
+        </CardContent>
+        <CardFooter className="flex justify-between border-t bg-muted/40 px-6 py-4">
+          <p className="text-xs text-muted-foreground">Last updated: Today</p>
+          <Button type="submit" form="profile-form" disabled={isSaving}>
+            {isSaving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+            Save Changes
+          </Button>
+        </CardFooter>
+      </Card>
+    </div>
+  )
+}
+
+// 2. Security Section
+function SecuritySection() {
+  const { toast } = useToast()
+  const [isSaving, setIsSaving] = useState(false)
+  const [passwords, setPasswords] = useState({ current: "", new: "", confirm: "" })
+  const [showPwd, setShowPwd] = useState({ current: false, new: false })
+
+  const handleUpdatePassword = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (passwords.new !== passwords.confirm) {
+      toast({ title: "Mismatch", description: "New passwords do not match.", variant: "destructive" })
+      return
+    }
+    setIsSaving(true)
+    const supabase = createClient()
+    
+    try {
+      const { error } = await supabase.auth.updateUser({ password: passwords.new })
+      if (error) throw error
+      toast({ title: "Success", description: "Password updated successfully." })
+      setPasswords({ current: "", new: "", confirm: "" })
+    } catch (error: any) {
+      toast({ title: "Error", description: error.message, variant: "destructive" })
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Password</CardTitle>
+        <CardDescription>Change your password to keep your account secure.</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleUpdatePassword} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="current">Current Password</Label>
+            <div className="relative">
+              <Input
+                id="current"
+                type={showPwd.current ? "text" : "password"}
+                value={passwords.current}
+                onChange={(e) => setPasswords({ ...passwords, current: e.target.value })}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPwd({ ...showPwd, current: !showPwd.current })}
+                className="absolute right-3 top-2.5 text-muted-foreground hover:text-foreground"
+              >
+                {showPwd.current ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="new">New Password</Label>
+              <div className="relative">
+                <Input
+                  id="new"
+                  type={showPwd.new ? "text" : "password"}
+                  value={passwords.new}
+                  onChange={(e) => setPasswords({ ...passwords, new: e.target.value })}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPwd({ ...showPwd, new: !showPwd.new })}
+                  className="absolute right-3 top-2.5 text-muted-foreground hover:text-foreground"
+                >
+                  {showPwd.new ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="confirm">Confirm Password</Label>
+              <Input
+                id="confirm"
+                type="password"
+                value={passwords.confirm}
+                onChange={(e) => setPasswords({ ...passwords, confirm: e.target.value })}
+              />
+            </div>
+          </div>
+        </form>
+      </CardContent>
+      <CardFooter className="border-t bg-muted/40 px-6 py-4 justify-end">
+        <Button onClick={handleUpdatePassword} disabled={isSaving || !passwords.new}>
+           {isSaving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+           Update Password
+        </Button>
+      </CardFooter>
+    </Card>
+  )
+}
+
+// 3. Sessions Section
+function SessionsSection() {
+  const [sessions, setSessions] = useState<Session[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    // Simulate fetching
+    setTimeout(() => {
+      setSessions([
+        { id: "1", device_info: "Chrome on macOS", last_activity: new Date().toISOString(), ip_address: "192.168.1.1", is_current: true },
+        { id: "2", device_info: "Safari on iPhone", last_activity: new Date(Date.now() - 86400000).toISOString(), ip_address: "10.0.0.1" },
+      ])
+      setLoading(false)
+    }, 1000)
+  }, [])
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Sessions</CardTitle>
+        <CardDescription>Manage your active sessions across devices.</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {loading ? (
+          <div className="space-y-3">
+             {[1,2].map(i => <div key={i} className="h-16 bg-muted/50 rounded-lg animate-pulse" />)}
+          </div>
+        ) : (
+          sessions.map((session) => (
+            <div key={session.id} className="flex items-center justify-between p-4 rounded-lg border bg-card hover:bg-accent/5 transition-colors">
+              <div className="flex items-center gap-4">
+                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Monitor className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <p className="font-medium text-sm flex items-center gap-2">
+                    {session.device_info}
+                    {session.is_current && <Badge variant="secondary" className="text-[10px] h-5">Current</Badge>}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {session.ip_address} • {new Date(session.last_activity).toLocaleDateString()}
+                  </p>
+                </div>
+              </div>
+              {!session.is_current && (
+                <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive">
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              )}
+            </div>
+          ))
+        )}
+      </CardContent>
+      <CardFooter className="border-t bg-muted/40 px-6 py-4">
+         <Button variant="destructive" size="sm" className="ml-auto">
+            <LogOut className="w-4 h-4 mr-2" /> Sign Out All Devices
+         </Button>
+      </CardFooter>
+    </Card>
+  )
+}
+
+// 4. Verification Section
+function VerificationSection({ user }: { user: SupabaseUser }) {
+  const { toast } = useToast()
+
+  const handleResend = () => {
+    toast({ title: "Sent", description: "Verification email sent to " + user.email })
+  }
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Identity Verification</CardTitle>
+          <CardDescription>Verify your identity to unlock all features.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          
+          {/* Email Status */}
+          <div className="flex items-center justify-between p-4 border rounded-lg bg-background">
+            <div className="flex gap-4 items-center">
+               <div className="h-10 w-10 bg-blue-50 dark:bg-blue-900/20 rounded-full flex items-center justify-center">
+                  <Mail className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+               </div>
+               <div>
+                  <h4 className="font-medium text-sm">Email Address</h4>
+                  <p className="text-xs text-muted-foreground">{user.email}</p>
+               </div>
+            </div>
+            {user.email_confirmed_at ? (
+               <Badge className="bg-emerald-500/15 text-emerald-600 hover:bg-emerald-500/25 border-emerald-200">
+                  <CheckCircle2 className="w-3 h-3 mr-1" /> Verified
+               </Badge>
+            ) : (
+               <Button size="sm" variant="outline" onClick={handleResend}>Verify</Button>
+            )}
+          </div>
+
+          {/* MFA Upsell */}
+          {!user.user_metadata?.mfa_enabled && (
+             <Alert className="bg-amber-500/10 border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-400">
+               <AlertCircle className="h-4 w-4" />
+               <AlertTitle>Security Recommendation</AlertTitle>
+               <AlertDescription className="text-xs mt-1">
+                 Enable Two-Factor Authentication (2FA) to add an extra layer of security to your account.
+               </AlertDescription>
+             </Alert>
+          )}
+
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
