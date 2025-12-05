@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Royal Elegance - Project Presentation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0f172a;
+            color: #f8fafc;
+            overflow: hidden;
+        }
+
+        .presentation {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .slide {
+            min-width: 100vw;
+            min-height: 100vh;
+            padding: 60px 80px;
+            display: none;
+            flex-direction: column;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            position: relative;
+            overflow-y: auto;
+        }
+
+        .slide.active {
+            display: flex;
+        }
+
+        .slide::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #d4af37, #f3e5b5, #d4af37);
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 3.5rem;
+            color: #d4af37;
+            margin-bottom: 20px;
+            text-shadow: 0 2px 10px rgba(212, 175, 55, 0.3);
+        }
+
+        h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            color: #d4af37;
+            margin-bottom: 30px;
+        }
+
+        h3 {
+            font-size: 1.5rem;
+            color: #f3e5b5;
+            margin-bottom: 15px;
+            margin-top: 25px;
+        }
+
+        p {
+            font-size: 1.2rem;
+            line-height: 1.8;
+            color: #cbd5e1;
+            margin-bottom: 15px;
+        }
+
+        ul {
+            list-style: none;
+            margin-left: 20px;
+        }
+
+        li {
+            font-size: 1.1rem;
+            line-height: 2;
+            color: #e2e8f0;
+            position: relative;
+            padding-left: 30px;
+        }
+
+        li::before {
+            content: '✦';
+            position: absolute;
+            left: 0;
+            color: #d4af37;
+        }
+
+        .highlight {
+            color: #d4af37;
+            font-weight: 600;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-top: 30px;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            border-radius: 16px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+
+        .card h3 {
+            margin-top: 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 15px 20px;
+            text-align: left;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+        }
+
+        th {
+            background: rgba(212, 175, 55, 0.1);
+            color: #d4af37;
+            font-weight: 600;
+        }
+
+        td {
+            color: #e2e8f0;
+        }
+
+        .code-block {
+            background: #1e293b;
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9rem;
+            color: #a5f3fc;
+            overflow-x: auto;
+            margin: 20px 0;
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            gap: 10px;
+            z-index: 1000;
+        }
+
+        .nav-btn {
+            background: rgba(212, 175, 55, 0.2);
+            border: 1px solid #d4af37;
+            color: #d4af37;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn:hover {
+            background: #d4af37;
+            color: #0f172a;
+        }
+
+        .slide-counter {
+            position: fixed;
+            bottom: 40px;
+            left: 30px;
+            color: #d4af37;
+            font-size: 1rem;
+            z-index: 1000;
+        }
+
+        .title-slide {
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .title-slide h1 {
+            font-size: 5rem;
+            margin-bottom: 30px;
+        }
+
+        .title-slide p {
+            font-size: 1.5rem;
+            color: #94a3b8;
+        }
+
+        .subtitle {
+            font-size: 1.8rem;
+            color: #f3e5b5;
+            margin-bottom: 40px;
+        }
+
+        .badge {
+            display: inline-block;
+            background: rgba(212, 175, 55, 0.2);
+            border: 1px solid #d4af37;
+            padding: 8px 20px;
+            border-radius: 30px;
+            color: #d4af37;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+        }
+
+        .tech-stack {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .tech-item {
+            background: rgba(212, 175, 55, 0.1);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            padding: 10px 20px;
+            border-radius: 8px;
+            color: #f3e5b5;
+        }
+
+        .stat-card {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 700;
+            color: #d4af37;
+            font-family: 'Playfair Display', serif;
+        }
+
+        .stat-label {
+            color: #94a3b8;
+            margin-top: 10px;
+        }
+
+        .timeline {
+            position: relative;
+            margin-top: 30px;
+        }
+
+        .timeline-item {
+            padding-left: 40px;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: 10px;
+            top: 0;
+            bottom: -30px;
+            width: 2px;
+            background: linear-gradient(180deg, #d4af37, rgba(212, 175, 55, 0.3));
+        }
+
+        .timeline-item::after {
+            content: '';
+            position: absolute;
+            left: 4px;
+            top: 5px;
+            width: 14px;
+            height: 14px;
+            background: #d4af37;
+            border-radius: 50%;
+        }
+
+        .timeline-item:last-child::before {
+            bottom: 0;
+        }
+
+        .architecture-box {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 10px 0;
+            text-align: center;
+        }
+
+        .flow-arrow {
+            text-align: center;
+            color: #d4af37;
+            font-size: 2rem;
+            margin: 10px 0;
+        }
+
+        .check-mark {
+            color: #22c55e;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+        }
+
+        .feature-icon {
+            color: #22c55e;
+            font-size: 1.2rem;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .slide.active > * {
+            animation: fadeIn 0.5s ease forwards;
+        }
+    </style>
+</head>
+<body>
+    <div class="presentation">
+        <!-- Slide 1: Title -->
+        <div class="slide title-slide active" id="slide1">
+            <div class="badge">🏨 Hotel Management System</div>
+            <h1>Royal Elegance</h1>
+            <p class="subtitle">Luxury Hotel Booking System</p>
+            <p>A comprehensive full-stack web application for hotel management</p>
+            <br><br>
+            <p style="color: #64748b;">Project Presentation - December 2025</p>
+        </div>
+
+        <!-- Slide 2: Overview -->
+        <div class="slide" id="slide2">
+            <h2>📋 Project Overview</h2>
+            <div class="grid-2">
+                <div class="card">
+                    <h3>🎯 Project Goals</h3>
+                    <ul>
+                        <li>Create seamless booking experience for guests</li>
+                        <li>Provide efficient management tools for staff</li>
+                        <li>Implement secure authentication & authorization</li>
+                        <li>Enable online payments (Stripe & KHQR)</li>
+                        <li>Build responsive, modern UI</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3>🎨 Design Theme</h3>
+                    <ul>
+                        <li><span class="highlight">Cultural Identity:</span> Khmer/Cambodian luxury</li>
+                        <li><span class="highlight">Philosophy:</span> Premium & elegant</li>
+                        <li><span class="highlight">Target Users:</span> Guests, Staff, Admins</li>
+                    </ul>
+                    <br>
+                    <p style="font-style: italic; color: #94a3b8;">"The Spirit of Luxury - Kingdom of Cambodia"</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: Technology Stack -->
+        <div class="slide" id="slide3">
+            <h2>🛠️ Technology Stack</h2>
+            <div class="grid-3">
+                <div class="card">
+                    <h3>Frontend</h3>
+                    <div class="tech-stack">
+                        <span class="tech-item">Next.js 15</span>
+                        <span class="tech-item">React 18</span>
+                        <span class="tech-item">TypeScript</span>
+                        <span class="tech-item">Tailwind CSS 4</span>
+                        <span class="tech-item">Framer Motion</span>
+                        <span class="tech-item">Radix UI</span>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>Backend & Database</h3>
+                    <div class="tech-stack">
+                        <span class="tech-item">Supabase</span>
+                        <span class="tech-item">PostgreSQL</span>
+                        <span class="tech-item">Row Level Security</span>
+                        <span class="tech-item">Supabase Auth</span>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>Payments & Tools</h3>
+                    <div class="tech-stack">
+                        <span class="tech-item">Stripe</span>
+                        <span class="tech-item">Git/GitHub</span>
+                        <span class="tech-item">Vercel</span>
+                        <span class="tech-item">VS Code</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: System Architecture -->
+        <div class="slide" id="slide4">
+            <h2>📊 System Architecture</h2>
+            <div style="max-width: 800px; margin: 0 auto;">
+                <div class="architecture-box">
+                    <strong style="color: #d4af37;">👥 CLIENT (Browser)</strong><br>
+                    Guest Portal | Staff Dashboard | Admin Dashboard
+                </div>
+                <div class="flow-arrow">⬇</div>
+                <div class="architecture-box">
+                    <strong style="color: #d4af37;">⚡ NEXT.JS APPLICATION</strong><br>
+                    App Router | Server Components | API Routes
+                </div>
+                <div class="flow-arrow">⬇</div>
+                <div class="architecture-box">
+                    <strong style="color: #d4af37;">🗄️ SUPABASE</strong><br>
+                    Auth Service | PostgreSQL Database | Storage
+                </div>
+                <div class="flow-arrow">⬇</div>
+                <div class="architecture-box">
+                    <strong style="color: #d4af37;">🔐 ROW LEVEL SECURITY</strong><br>
+                    50+ Policies | Role-based Access Control
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: Database Statistics -->
+        <div class="slide" id="slide5">
+            <h2>🗄️ Database Design</h2>
+            <div class="grid-3">
+                <div class="card stat-card">
+                    <div class="stat-number">18</div>
+                    <div class="stat-label">Tables</div>
+                </div>
+                <div class="card stat-card">
+                    <div class="stat-number">50+</div>
+                    <div class="stat-label">RLS Policies</div>
+                </div>
+                <div class="card stat-card">
+                    <div class="stat-number">1,200+</div>
+                    <div class="stat-label">Lines of SQL</div>
+                </div>
+            </div>
+            <div class="grid-2" style="margin-top: 40px;">
+                <div class="card">
+                    <h3>Core Tables</h3>
+                    <ul>
+                        <li>profiles (User Management)</li>
+                        <li>room_types (Room Categories)</li>
+                        <li>rooms (Individual Rooms)</li>
+                        <li>bookings (Reservations)</li>
+                        <li>services (Hotel Services)</li>
+                        <li>floors (Building Structure)</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3>Role-Based Access</h3>
+                    <table>
+                        <tr><th>Role</th><th>Access Level</th></tr>
+                        <tr><td>Admin</td><td>Full CRUD + Analytics</td></tr>
+                        <tr><td>Staff</td><td>Manage Bookings/Rooms</td></tr>
+                        <tr><td>User</td><td>Book & View Own Data</td></tr>
+                        <tr><td>Guest</td><td>Browse Only</td></tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: Key Features - Users -->
+        <div class="slide" id="slide6">
+            <h2>✨ Key Features - User Portal</h2>
+            <div class="grid-2">
+                <div class="card">
+                    <h3>🔐 Authentication</h3>
+                    <div class="feature-grid">
+                        <div class="feature-item"><span class="feature-icon">✓</span> Email & Password</div>
+                        <div class="feature-item"><span class="feature-icon">✓</span> Google OAuth</div>
+                        <div class="feature-item"><span class="feature-icon">✓</span> Phone OTP</div>
+                        <div class="feature-item"><span class="feature-icon">✓</span> Password Reset</div>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>🛏️ Room Booking</h3>
+                    <div class="feature-grid">
+                        <div class="feature-item"><span class="feature-icon">✓</span> Browse Rooms</div>
+                        <div class="feature-item"><span class="feature-icon">✓</span> Filter & Search</div>
+                        <div class="feature-item"><span class="feature-icon">✓</span> Date Selection</div>
+                        <div class="feature-item"><span class="feature-icon">✓</span> Instant Booking</div>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>🛎️ Hotel Services</h3>
+                    <div class="feature-grid">
+                        <div class="feature-item"><span class="feature-icon">✓</span> Spa & Wellness</div>
+                        <div class="feature-item"><span class="feature-icon">✓</span> Dining</div>
+                        <div class="feature-item"><span class="feature-icon">✓</span> Transportation</div>
+                        <div class="feature-item"><span class="feature-icon">✓</span> Concierge</div>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>💳 Payments (Stripe)</h3>
+                    <div class="feature-grid">
+                        <div class="feature-item"><span class="feature-icon">✓</span> Credit Cards</div>
+                        <div class="feature-item"><span class="feature-icon">✓</span> Debit Cards</div>
+                        <div class="feature-item"><span class="feature-icon">✓</span> Secure Checkout</div>
+                        <div class="feature-item"><span class="feature-icon">✓</span> Receipts</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: Key Features - Admin -->
+        <div class="slide" id="slide7">
+            <h2>✨ Key Features - Admin & Staff</h2>
+            <div class="grid-2">
+                <div class="card">
+                    <h3>👨‍💼 Admin Dashboard</h3>
+                    <ul>
+                        <li>Booking statistics & analytics</li>
+                        <li>Revenue reports</li>
+                        <li>User management</li>
+                        <li>CRUD for rooms, services, floors</li>
+                        <li>System configuration</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3>👷 Staff Dashboard</h3>
+                    <ul>
+                        <li>Room status updates</li>
+                        <li>Check-in / Check-out</li>
+                        <li>Booking management</li>
+                        <li>Guest requests</li>
+                        <li>Service handling</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="card" style="margin-top: 30px;">
+                <h3>📋 Booking Management</h3>
+                <div class="feature-grid" style="grid-template-columns: repeat(4, 1fr);">
+                    <div class="feature-item"><span class="feature-icon">✓</span> View All Bookings</div>
+                    <div class="feature-item"><span class="feature-icon">✓</span> Approve/Reject</div>
+                    <div class="feature-item"><span class="feature-icon">✓</span> Check-in/out</div>
+                    <div class="feature-item"><span class="feature-icon">✓</span> Cancellations</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 8: UI Design -->
+        <div class="slide" id="slide8">
+            <h2>🎨 User Interface Design</h2>
+            <div class="grid-2">
+                <div class="card">
+                    <h3>Color Palette</h3>
+                    <div style="display: flex; gap: 15px; margin-top: 20px; flex-wrap: wrap;">
+                        <div style="text-align: center;">
+                            <div style="width: 60px; height: 60px; background: #d4af37; border-radius: 12px;"></div>
+                            <small style="color: #d4af37; font-weight: 600;">Primary</small><br>
+                            <small style="color: #94a3b8;">#d4af37</small>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="width: 60px; height: 60px; background: #1e293b; border-radius: 12px; border: 1px solid #334155;"></div>
+                            <small style="color: #94a3b8; font-weight: 600;">Secondary</small><br>
+                            <small style="color: #94a3b8;">#1e293b</small>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="width: 60px; height: 60px; background: #f3e5b5; border-radius: 12px;"></div>
+                            <small style="color: #94a3b8;">Accent</small><br>
+                            <small style="color: #94a3b8;">#f3e5b5</small>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="width: 60px; height: 60px; background: #e1e4d1; border-radius: 12px;"></div>
+                            <small style="color: #94a3b8;">Background</small><br>
+                            <small style="color: #94a3b8;">#e1e4d1</small>
+                        </div>
+                    </div>
+                    <h3>Typography</h3>
+                    <table style="margin-top: 10px;">
+                        <tr>
+                            <td style="color: #94a3b8;">Title Font:</td>
+                            <td style="font-family: 'Playfair Display', serif; font-size: 1.3rem; color: #d4af37;">Playfair Display</td>
+                        </tr>
+                        <tr>
+                            <td style="color: #94a3b8;">Description Font:</td>
+                            <td style="font-family: 'Inter', sans-serif; color: #e2e8f0;">Inter</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="card">
+                    <h3>Design Details</h3>
+                    <table style="margin-top: 10px;">
+                        <tr><th>Element</th><th>Specification</th></tr>
+                        <tr><td>Primary Color</td><td style="color: #d4af37;">Gold (#d4af37)</td></tr>
+                        <tr><td>Secondary Color</td><td>Slate Dark (#1e293b)</td></tr>
+                        <tr><td>Title Font</td><td>Playfair Display (Serif)</td></tr>
+                        <tr><td>Body Font</td><td>Inter (Sans-serif)</td></tr>
+                        <tr><td>Border Radius</td><td>8px - 16px</td></tr>
+                        <tr><td>Spacing</td><td>4px base unit</td></tr>
+                    </table>
+                </div>
+            </div>
+            <div class="grid-2" style="margin-top: 20px;">
+                <div class="card">
+                    <h3>59+ UI Components</h3>
+                    <div class="tech-stack">
+                        <span class="tech-item">Buttons</span>
+                        <span class="tech-item">Cards</span>
+                        <span class="tech-item">Dialogs</span>
+                        <span class="tech-item">Forms</span>
+                        <span class="tech-item">Tables</span>
+                        <span class="tech-item">Charts</span>
+                        <span class="tech-item">Calendars</span>
+                        <span class="tech-item">Toasts</span>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>Responsive Breakpoints</h3>
+                    <table style="margin-top: 10px; font-size: 0.9rem;">
+                        <tr><td>sm</td><td>640px (Mobile)</td></tr>
+                        <tr><td>md</td><td>768px (Tablet)</td></tr>
+                        <tr><td>lg</td><td>1024px (Laptop)</td></tr>
+                        <tr><td>xl</td><td>1280px (Desktop)</td></tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 9: Security -->
+        <div class="slide" id="slide9">
+            <h2>🔒 Security Implementation</h2>
+            <div class="grid-2">
+                <div class="card">
+                    <h3>Authentication Flow</h3>
+                    <div class="code-block">
+1. User submits credentials<br>
+2. Supabase Auth validates<br>
+3. JWT token generated<br>
+4. Session stored (HttpOnly cookie)<br>
+5. Client receives auth state
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>Row Level Security (RLS)</h3>
+                    <div class="code-block" style="font-size: 0.8rem;">
+-- Users view own bookings<br>
+CREATE POLICY "Users view own"<br>
+  ON bookings FOR SELECT<br>
+  USING (auth.uid() = user_id);
+                    </div>
+                </div>
+            </div>
+            <div class="card" style="margin-top: 30px;">
+                <h3>Security Measures</h3>
+                <div class="feature-grid" style="grid-template-columns: repeat(4, 1fr);">
+                    <div class="feature-item"><span class="feature-icon">🔐</span> JWT Auth</div>
+                    <div class="feature-item"><span class="feature-icon">🛡️</span> RLS Policies</div>
+                    <div class="feature-item"><span class="feature-icon">✅</span> Zod Validation</div>
+                    <div class="feature-item"><span class="feature-icon">🔒</span> CSRF Protection</div>
+                    <div class="feature-item"><span class="feature-icon">🚫</span> XSS Prevention</div>
+                    <div class="feature-item"><span class="feature-icon">🔑</span> API Protection</div>
+                    <div class="feature-item"><span class="feature-icon">📝</span> Input Sanitization</div>
+                    <div class="feature-item"><span class="feature-icon">🛡️</span> Secure Headers</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 10: Development Timeline -->
+        <div class="slide" id="slide10">
+            <h2>📅 Development Timeline</h2>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <h3 style="margin-top: 0;">Phase 1: Planning & Setup (Week 1-2)</h3>
+                    <p>Requirements gathering, technology selection, database design, project setup</p>
+                </div>
+                <div class="timeline-item">
+                    <h3 style="margin-top: 0;">Phase 2: Core Development (Week 3-6)</h3>
+                    <p>Authentication system, user profiles, room listing, booking system, admin dashboard</p>
+                </div>
+                <div class="timeline-item">
+                    <h3 style="margin-top: 0;">Phase 3: Features & Integration (Week 7-10)</h3>
+                    <p>Stripe & KHQR payments, service booking, staff dashboard, notifications</p>
+                </div>
+                <div class="timeline-item">
+                    <h3 style="margin-top: 0;">Phase 4: Polish & Deployment (Week 11-12)</h3>
+                    <p>UI refinements, bug fixes, performance optimization, security audit, Vercel deployment</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 11: Challenges & Solutions -->
+        <div class="slide" id="slide11">
+            <h2>🚧 Challenges & Solutions</h2>
+            <div class="grid-2">
+                <div class="card">
+                    <h3>Challenge 1: Hydration Errors</h3>
+                    <p><strong>Problem:</strong> React hydration mismatch</p>
+                    <p><strong>Solution:</strong> Proper client/server separation, removed window checks</p>
+                </div>
+                <div class="card">
+                    <h3>Challenge 2: Database Security</h3>
+                    <p><strong>Problem:</strong> Data isolation between users</p>
+                    <p><strong>Solution:</strong> 50+ RLS policies, role-based access control</p>
+                </div>
+                <div class="card">
+                    <h3>Challenge 3: Payment Integration</h3>
+                    <p><strong>Problem:</strong> Support international & local payments</p>
+                    <p><strong>Solution:</strong> Stripe for cards, KHQR for Cambodian users</p>
+                </div>
+                <div class="card">
+                    <h3>Challenge 4: Responsive Design</h3>
+                    <p><strong>Problem:</strong> Consistent experience across devices</p>
+                    <p><strong>Solution:</strong> Mobile-first Tailwind CSS, 5 breakpoints</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 12: Project Summary -->
+        <div class="slide" id="slide12">
+            <h2>📊 Project Summary</h2>
+            <div class="grid-3">
+                <div class="card stat-card">
+                    <div class="stat-number">59+</div>
+                    <div class="stat-label">UI Components</div>
+                </div>
+                <div class="card stat-card">
+                    <div class="stat-number">18</div>
+                    <div class="stat-label">Database Tables</div>
+                </div>
+                <div class="card stat-card">
+                    <div class="stat-number">50+</div>
+                    <div class="stat-label">Security Policies</div>
+                </div>
+            </div>
+            <div class="card" style="margin-top: 40px;">
+                <h3>Key Achievements</h3>
+                <div class="feature-grid" style="grid-template-columns: repeat(3, 1fr);">
+                    <div class="feature-item"><span class="feature-icon">✓</span> Complete Booking System</div>
+                    <div class="feature-item"><span class="feature-icon">✓</span> Secure Authentication</div>
+                    <div class="feature-item"><span class="feature-icon">✓</span> Payment Integration</div>
+                    <div class="feature-item"><span class="feature-icon">✓</span> Beautiful UI Design</div>
+                    <div class="feature-item"><span class="feature-icon">✓</span> Role-based Access</div>
+                    <div class="feature-item"><span class="feature-icon">✓</span> Production Ready</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 13: Future Plans -->
+        <div class="slide" id="slide13">
+            <h2>🚀 Future Improvements</h2>
+            <div class="grid-2">
+                <div class="card">
+                    <h3>Planned Features</h3>
+                    <ul>
+                        <li>Multi-language Support (Khmer/English)</li>
+                        <li>Advanced Analytics Dashboard</li>
+                        <li>AI Chatbot Support</li>
+                        <li>Loyalty/Rewards Program</li>
+                        <li>Integration with OTAs (Booking.com)</li>
+                        <li>Email Notification System</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3>Technical Improvements</h3>
+                    <ul>
+                        <li>Unit & Integration Testing</li>
+                        <li>E2E Testing with Playwright</li>
+                        <li>CI/CD Pipeline</li>
+                        <li>Performance Monitoring</li>
+                        <li>Error Tracking (Sentry)</li>
+                        <li>SEO Optimization</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 14: Thank You -->
+        <div class="slide title-slide" id="slide14">
+            <h1>🙏 Thank You!</h1>
+            <p class="subtitle">Questions & Discussion</p>
+            <br><br>
+            <div style="text-align: center; color: #64748b;">
+                <p><strong style="color: #d4af37;">Project:</strong> Royal Elegance Hotel Booking System</p>
+                <p><strong style="color: #d4af37;">Repository:</strong> github.com/sakkol-git/royal-elegance</p>
+                <p><strong style="color: #d4af37;">Date:</strong> December 2025</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="slide-counter">
+        <span id="currentSlide">1</span> / <span id="totalSlides">14</span>
+    </div>
+    <div class="navigation">
+        <button class="nav-btn" onclick="prevSlide()">← Previous</button>
+        <button class="nav-btn" onclick="nextSlide()">Next →</button>
+    </div>
+
+    <script>
+        let currentSlide = 1;
+        const totalSlides = 14;
+
+        function showSlide(n) {
+            const slides = document.querySelectorAll('.slide');
+            
+            if (n > totalSlides) currentSlide = 1;
+            if (n < 1) currentSlide = totalSlides;
+            
+            slides.forEach((slide, index) => {
+                slide.classList.remove('active');
+                if (index === currentSlide - 1) {
+                    slide.classList.add('active');
+                }
+            });
+            
+            document.getElementById('currentSlide').textContent = currentSlide;
+        }
+
+        function nextSlide() {
+            currentSlide++;
+            showSlide(currentSlide);
+        }
+
+        function prevSlide() {
+            currentSlide--;
+            showSlide(currentSlide);
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                nextSlide();
+            } else if (e.key === 'ArrowLeft') {
+                prevSlide();
+            }
+        });
+
+        // Initialize
+        document.getElementById('totalSlides').textContent = totalSlides;
+    </script>
+</body>
+</html>

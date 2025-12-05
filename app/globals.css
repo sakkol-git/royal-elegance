@@ -243,7 +243,6 @@
   }
 
   .tabs-trigger[data-state="active"] {
-    align-self: center;
     background: linear-gradient(135deg, rgba(116, 97, 35, 0.712) 0%, rgba(255, 255, 255, 0.9) 50%, rgba(212, 175, 55, 0.15) 100%);
     border: 1.5px solid rgba(212, 175, 55, 0.4);
     box-shadow: 0 4px 12px rgba(212, 175, 55, 0.2), 

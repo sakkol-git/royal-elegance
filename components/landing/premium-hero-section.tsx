@@ -46,7 +46,7 @@ export function PremiumHeroSection() {
         BEST PRACTICE: On ultrawide, use h-screen to fill viewport, 
         but constrain content width so users don't have to turn their heads.
       */}
-      <section ref={targetRef} className="relative h-screen min-h-[600px] w-full flex items-center justify-center overflow-hidden bg-black">
+      <section ref={targetRef} className="relative h-screen min-h-[600px] w-full flex items-center justify-center overflow-hidden pb-8 bg-black">
         
         {/* VIDEO BACKGROUND LAYER (Full Width) */}
         <motion.div style={{ y: yBg }} className="absolute inset-0 z-0">
@@ -390,7 +390,7 @@ export function PremiumHeroSection() {
               </motion.p>
               
               <motion.div variants={fadeInUp}>
-                <Button variant="outline" className="h-12 px-8 border-[#d4af37] text-[#d4af37] hover:bg-[#d4af37] hover:text-black rounded-none uppercase tracking-widest text-xs transition-all duration-300">
+                <Button variant="outline" className="h-12 px-8 border-[#d4af37] bg-[#d4af37] text-slate-900 font-medium hover:bg-[#f3e5b5] hover:text-slate-900 rounded-none uppercase tracking-widest text-xs transition-all duration-300">
                   Discover Dining
                 </Button>
               </motion.div>
